@@ -1,8 +1,6 @@
 [runner]
 fastReruns = true
 [theme]
-base="light"
+base="dark"
 primaryColor="BB8493"
-secondaryBackgroundColor="#F5F5F5"
-textColor="#000000"
 

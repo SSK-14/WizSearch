@@ -6,30 +6,42 @@ def intent_prompt(user_query):
     Task: Check if the query is a valid search query and categorize it into one of the following categories intents:
 
     Valid query: User's query is clear and valid.
-    [ NO NEED TO ANSWER QUERY ]
-    Output: {{"intent": "valid_query", "message": "NONE"}}
+    Output: "valid_query"
 
     Greeting: User greets the assistant or initiates a conversation.
-    Output: {{"intent": "greeting", "message": "<Reply to user's greeting>"}}
+    Output: "greeting"
+
     Query not clear: User's query is not clear or ambiguous.
-    Output: {{"intent": "query_not_clear", "message": "<Ask user to provide more details or clarification>"}}
+    Output: "query_not_clear"
+
     Out of scope or context: Applies when the user's request doesn't fit any listed intents or falls beyond the assistant's scope, or the intent is ambiguous.
-    Output: {{"intent": "out_of_scope", "message": "<Inform user that the request is out of scope>"}}
+    Output: "out_of_scope"
 
-    Your objective is to accurately map each user responses to the relevant intent and provide the assistant's response.
     User Query: {user_query}
-    Your Output JSON response:"""
+    Output:"""
 
 
-def rag_prompt(search_results, history=None):
-    system_prompt = f"""You are a WizSearch.AI an helpful assistant that helps answering question from the below search result information only.
-    SEARCH INFORMATION is below.
+def base_prompt(intent, query):
+    prompt = f"""You are a WizSearch.AI an search expert that helps answering question. 
+    Found that user query is either greetings, ambiguous, not clear or out of scope. Please provide appropriate response to the user.
+    
+    User query: {query}
+    Intent: {intent}
+
+    Response:
+    """
+    return prompt
+
+def search_rag_prompt(search_results, history=None):
+    system_prompt = f"""You are a WizSearch.AI an search expert that helps answering question, 
+    utilize the search information to their fullest potential to provide additional information and assistance in your response.
+    SEARCH INFORMATION is below:
     ---------------------
     {search_results}
     ---------------------
     RULES:
     1. Only Answer the USER QUESTION using the INFORMATION.
-    2. Include source link in the answer.
+    2. Include source link and images in the answer.
     3. Respond in markdown format.
     """
     
