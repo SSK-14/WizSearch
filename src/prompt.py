@@ -1,5 +1,3 @@
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-
 def intent_prompt(user_query):
     return f"""
     Role: Intent Classifier for Search query given by the user.
@@ -33,7 +31,7 @@ def base_prompt(intent, query):
     return prompt
 
 def search_rag_prompt(search_results, history=None):
-    system_prompt = f"""You are a WizSearch.AI an search expert that helps answering question, 
+    system_prompt = f"""<|im_start|>system\nYou are a WizSearch.AI an search expert that helps answering question, 
     utilize the search information to their fullest potential to provide additional information and assistance in your response.
     SEARCH INFORMATION is below:
     ---------------------
@@ -43,16 +41,18 @@ def search_rag_prompt(search_results, history=None):
     1. Only Answer the USER QUESTION using the INFORMATION.
     2. Include source link and images in the answer.
     3. Respond in markdown format.
+    <|im_end|>\n
     """
     
-    messages = [
-        SystemMessage(content=system_prompt)
-    ]
-    if history is not None:
-        for message in history:
-            if message["role"] == "user":
-                messages.append(HumanMessage(content=message["content"]))
-            else:
-                messages.append(AIMessage(content=message["content"]))
+    prompt = [system_prompt]
+    for dict_message in history:
+        if dict_message["role"] == "user":
+            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
+        else:
+            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
+    
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
 
-    return messages
+    return prompt_str
