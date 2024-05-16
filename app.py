@@ -13,7 +13,7 @@ os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
 tavily = TavilyClient(api_key=st.secrets['TAVILY_API_KEY'])
 
 def main():
-    st.title("👋🔍 SearchWiz Playground")
+    st.title("🔍 :orange[AI] Playground")
     side_info()
     display_chat_messages(st.session_state.messages)
     if query := st.chat_input("Enter your search query here..."):
@@ -27,8 +27,8 @@ def main():
             intent = llm_generate(intent_prompt(query))
             intent = intent.strip().lower()
             st.write(f"🔍 Intent: {intent}")
-            
-            if intent == "valid_query":
+
+            if "valid_query" in intent:
                 st.write("🌐 Searching the web...")
                 search_results = tavily.search(query, search_depth="advanced", include_images=True)
                 search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]

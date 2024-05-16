@@ -1,12 +1,10 @@
 import streamlit as st
 
-
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.png", "user": "👤"}
     for message in messages:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.markdown(message["content"])
-
 
 def display_search_result(search_results):
     with st.expander("Image Results", expanded=False):

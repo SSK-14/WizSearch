@@ -16,6 +16,8 @@ def llm_stream(prompt):
     input = {
         "prompt": prompt,
         "prompt_template": r"{prompt}",
+        "temperature": st.session_state.temperature,
+        "top_p": st.session_state.top_p,
     }
     for event_index, event in enumerate(replicate.stream(
         "snowflake/snowflake-arctic-instruct",
