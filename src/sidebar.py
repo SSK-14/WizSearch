@@ -10,4 +10,3 @@ def side_info():
                                 step=0.01, key="temperature")
             st.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01,
                             key="top_p")
-        

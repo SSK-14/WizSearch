@@ -20,18 +20,18 @@ def intent_prompt(user_query):
 
 
 def base_prompt(intent, query):
-    prompt = f"""You are a WizSearch.AI an search expert that helps answering question. 
+    prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
     Found that user query is either greetings, ambiguous, not clear or out of scope. Please provide appropriate response to the user.
-    
     User query: {query}
     Intent: {intent}
-
-    Response:
+    Must only give the appropriate response.
+    <|im_end|>\n
+    <|im_start|>assistant\n
     """
     return prompt
 
 def search_rag_prompt(search_results, history=None):
-    system_prompt = f"""<|im_start|>system\nYou are a WizSearch.AI an search expert that helps answering question, 
+    system_prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question, 
     utilize the search information to their fullest potential to provide additional information and assistance in your response.
     SEARCH INFORMATION is below:
     ---------------------
