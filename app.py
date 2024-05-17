@@ -2,8 +2,8 @@ import os
 import streamlit as st
 from src.sidebar import side_info
 from src.model import llm_generate, llm_stream
-from src.prompt import intent_prompt, search_rag_prompt, base_prompt
-from src.ui import display_search_result, display_chat_messages
+from src.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt
+from src.ui import display_search_result, display_chat_messages, abort_chat
 from tavily import TavilyClient
 
 os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
@@ -31,12 +31,17 @@ def main():
             st.write(f"🔍 Intent validated...")
 
             if "valid_query" in intent:
+                query = llm_generate(query_formatting_prompt(query))
+                st.write(f"📝 Search query: {query}")
                 st.write("🌐 Searching the web...")
                 search_results = tavily.search(query, search_depth="advanced", include_images=True)
-                search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
-                st.json(search_results, expanded=False)
-                prompt = search_rag_prompt(search_context, st.session_state.messages)
-                status.update(label="Done and dusted!", state="complete", expanded=False)
+                if search_results["results"]:
+                    search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
+                    st.json(search_results, expanded=False)
+                    prompt = search_rag_prompt(search_context, st.session_state.messages)
+                    status.update(label="Done and dusted!", state="complete", expanded=False)
+                else:
+                    abort_chat("I'm sorry, There was an error in search. Please try again.")
             else:
                 prompt = base_prompt(intent, query)
                 status.update(label="Done and dusted!", state="complete", expanded=False)
@@ -48,7 +53,6 @@ def main():
             st.write_stream(llm_stream(prompt))
 
     if st.session_state.chat_aborted:
-        st.button('Reset chat', on_click=clear_chat_history, key="clear_chat_history")
         st.chat_input(disabled=True)
     elif query := st.chat_input("Enter your search query here..."):
         st.session_state.messages.append({"role": "user", "content": query})
@@ -59,5 +63,5 @@ def main():
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Wiz AI", page_icon="🔍")
+    st.set_page_config(page_title="Wiz AI", page_icon="🌟")
     main()

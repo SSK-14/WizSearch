@@ -3,6 +3,8 @@ etc/
 include/
 lib/
 share/
+.vscode
+__pycache__/
 env
 .env
 secrets.toml

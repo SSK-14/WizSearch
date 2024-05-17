@@ -18,6 +18,15 @@ def intent_prompt(user_query):
     User Query: {user_query}
     Output:"""
 
+def query_formatting_prompt(user_query):
+    return f"""
+    Role: Query Formatter for Search query given by the user.
+    Task: Format the user query to make it more suitable for search.
+
+    User Query: {user_query}
+
+    Only return the formatted query.
+    Formatted Query:"""
 
 def base_prompt(intent, query):
     prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
