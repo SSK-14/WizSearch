@@ -1,6 +1,5 @@
 def intent_prompt(user_query):
-    return f"""
-    Role: Intent Classifier for Search query given by the user.
+    return f"""<|im_start|>system\nRole: Intent Classifier for Search query given by the user.
     Task: Check if the query is a valid search query and categorize it into one of the following categories intents:
 
     Valid query: User's query is clear and valid.
@@ -16,17 +15,15 @@ def intent_prompt(user_query):
     Output: "out_of_scope"
 
     User Query: {user_query}
-    Output:"""
+    Output:<|im_end|>\n
+    <|im_start|>assistant\n"""
 
 def query_formatting_prompt(user_query):
-    return f"""
-    Role: Query Formatter for Search query given by the user.
+    return f"""<|im_start|>system\nRole: Query Formatter for Search query given by the user.
     Task: Format the user query to make it more suitable for search.
-
     User Query: {user_query}
-
-    Only return the formatted query.
-    Formatted Query:"""
+    Only return the formatted query.<|im_end|>\n
+    <|im_start|>assistant\n"""
 
 def base_prompt(intent, query):
     prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
@@ -38,6 +35,30 @@ def base_prompt(intent, query):
     <|im_start|>assistant\n
     """
     return prompt
+
+def standalone_query_prompt(history=None):
+    system_prompt = f"""<|im_start|>system\nRole: Standalone Question Creator.
+    TASK: Create a standalone question based on the conversation that can be used to search.
+    If the new question itself is a standalone question, then return the same question.
+
+    RULES:
+    1. Do not answer the question, only create a standalone question.
+    2. Include key information/words in the question.
+    <|im_end|>\n
+    """
+    
+    prompt = [system_prompt]
+    for dict_message in history:
+        if dict_message["role"] == "user":
+            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
+        else:
+            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
+    
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
+
+    return prompt_str
 
 def search_rag_prompt(search_results, history=None):
     system_prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question, 
