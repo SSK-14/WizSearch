@@ -4,7 +4,7 @@ from langfuse import Langfuse
 from src.sidebar import side_info
 from src.model import llm_generate, llm_stream
 from src.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
-from src.ui import display_search_result, display_chat_messages, abort_chat
+from src.ui import display_search_result, display_chat_messages, abort_chat, feedback
 from tavily import TavilyClient
 
 os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
@@ -32,6 +32,7 @@ async def main():
     if st.session_state.messages[-1]["role"] != "assistant":
         query = st.session_state.messages[-1]["content"]
         trace = langfuse.trace(name="AI Search", input=query)
+        st.session_state.trace = trace
 
         try:
             with st.status("🚀 AI at work...", expanded=True) as status:
@@ -86,7 +87,11 @@ async def main():
         st.rerun()
 
     if len(st.session_state.messages) > 1:
-        st.button('New Chat', on_click=clear_chat_history)
+        col1, col2 = st.columns([1, 4])
+        col1.button('New Chat', on_click=clear_chat_history)
+        with col2:
+            feedback()
+                
         selected_followup_query = st.radio("Follow-up Questions:", followup_query, index=None)
         if selected_followup_query is None:
             st.stop()

@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_feedback import streamlit_feedback
 
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.svg", "user": "👤"}
@@ -28,3 +29,20 @@ def abort_chat(error_message: str):
         st.session_state.messages[-1]["content"] = error_message
     st.session_state.chat_aborted = True
     st.rerun()
+
+def feedback():
+    trace = st.session_state.trace
+    scores = {"😀": 1, "🙂": 0.75, "😐": 0.5, "🙁": 0.25, "😞": 0}
+    if "feedback_" + trace.id not in st.session_state:
+        streamlit_feedback(
+            feedback_type="faces",
+            optional_text_label="[Optional] Please provide an explanation",
+            key=f"feedback_{trace.id}",
+        )
+    else:
+        feedback = st.session_state["feedback_" + trace.id]
+        trace.score(
+            name="user-explicit-feedback",
+            value=scores[feedback["score"]],
+            comment=feedback["text"],
+        )
