@@ -23,7 +23,7 @@ def query_formatting_prompt(user_query):
     Task: Format the user query to make it more suitable for search.
     User Query: {user_query}
     Only return the formatted query.<|im_end|>\n
-    <|im_start|>assistant\n"""
+    <|im_start|>assistant\n Formatted Query:"""
 
 def base_prompt(intent, query):
     prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
@@ -33,6 +33,22 @@ def base_prompt(intent, query):
     Must only give the appropriate response.
     <|im_end|>\n
     <|im_start|>assistant\n
+    """
+    return prompt
+
+def followup_query_prompt(query):
+    prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
+    Role: Follow-up Question Creator.
+    TASK: Create two follow-up question's user can potentially ask based on the previous query.
+    Give the response in ARRAY format:
+    EXAMPLE:
+    User Query: "What is the capital of France?"
+    Response: ["What is the population of Paris?", "Place to visit in Paris?"]
+    <|im_end|>\n
+    <|im_start|>assistant\n
+    User query: {query}
+    Response:
+    <|im_end|>\n
     """
     return prompt
 

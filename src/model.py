@@ -3,7 +3,7 @@ import replicate
 
 MODEL = "snowflake/snowflake-arctic-instruct"
 
-def llm_generate(prompt, trace, name="llm-generate"):
+async def llm_generate(prompt, trace, name="llm-generate"):
     generation = trace.generation(
         name=name,
         model=MODEL,
