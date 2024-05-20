@@ -33,16 +33,17 @@ def abort_chat(error_message: str):
 def feedback():
     trace = st.session_state.trace
     scores = {"😀": 1, "🙂": 0.75, "😐": 0.5, "🙁": 0.25, "😞": 0}
-    if "feedback_" + trace.id not in st.session_state:
+    if "feedback_" + trace.id not in st.session_state: 
         streamlit_feedback(
             feedback_type="faces",
             optional_text_label="[Optional] Please provide an explanation",
             key=f"feedback_{trace.id}",
         )
     else:
-        feedback = st.session_state["feedback_" + trace.id]
-        trace.score(
-            name="user-explicit-feedback",
-            value=scores[feedback["score"]],
-            comment=feedback["text"],
-        )
+        if st.session_state["feedback_" + trace.id] is not None:
+            feedback = st.session_state["feedback_" + trace.id]
+            trace.score(
+                name="user-explicit-feedback",
+                value=scores[feedback["score"]],
+                comment=feedback["text"],
+            )

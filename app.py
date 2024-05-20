@@ -16,7 +16,7 @@ tavily = TavilyClient(api_key=st.secrets['TAVILY_API_KEY'])
 langfuse = Langfuse()
 
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm SearchWiz your super-smart AI assistant using [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). Ask me anything you are looking for 🪄."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant using [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). Ask me anything you are looking for 🪄."}]
     st.session_state.chat_aborted = False
 
 if "messages" not in st.session_state:
@@ -28,7 +28,7 @@ async def main():
     display_chat_messages(st.session_state.messages)
 
     search_results = None
-    followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
+    st.session_state.followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
     if st.session_state.messages[-1]["role"] != "assistant":
         query = st.session_state.messages[-1]["content"]
         trace = langfuse.trace(name="AI Search", input=query)
@@ -45,9 +45,8 @@ async def main():
                     if len(st.session_state.messages) > 3:
                         query = await llm_generate(standalone_query_prompt(st.session_state.messages), trace, "Standalone Query")
                         st.write(f"❓ Standalone query: {query}")
-                    else:
-                        query = await llm_generate(query_formatting_prompt(query), trace, "Query Formatting")
-                        st.write(f"📝 Search query: {query}")
+                    query = await llm_generate(query_formatting_prompt(query), trace, "Query Formatting")
+                    st.write(f"📝 Search query: {query}")
                     st.write("🌐 Searching the web...")
                     retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)
                     search_results = tavily.search(query, search_depth="advanced", include_images=True)
@@ -70,16 +69,13 @@ async def main():
 
         if search_results:
             display_search_result(search_results)
+            followup_query = await followup_query_asyncio
+            st.session_state.followup_query = json.loads(followup_query)
   
         with st.chat_message("assistant", avatar="./src/assets/logo.svg"):
             st.write_stream(llm_stream(prompt, trace, "Final Answer"))
-        
         trace.update(output=st.session_state.messages[-1]["content"])
         
-        if search_results:
-            followup_query = await followup_query_asyncio
-            followup_query = json.loads(followup_query)
-
     if st.session_state.chat_aborted:
         st.chat_input("Enter your search query here...", disabled=True)
     elif query := st.chat_input("Enter your search query here..."):
@@ -92,12 +88,13 @@ async def main():
         with col2:
             feedback()
                 
-        selected_followup_query = st.radio("Follow-up Questions:", followup_query, index=None)
+        selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
         if selected_followup_query is None:
             st.stop()
-        if st.button("Ask Wiz") and selected_followup_query:
-            st.session_state.messages.append({"role": "user", "content": selected_followup_query})
-            st.rerun()
+        else:
+            if st.button("Ask Wiz", type="primary"):
+                st.session_state.messages.append({"role": "user", "content": selected_followup_query})
+                st.rerun()
 
 
 if __name__ == "__main__":

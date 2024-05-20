@@ -26,7 +26,7 @@ def query_formatting_prompt(user_query):
     <|im_start|>assistant\n Formatted Query:"""
 
 def base_prompt(intent, query):
-    prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
+    prompt = f"""<|im_start|>system\nYou are a WizSearch.AI an search expert that helps answering question. 
     Found that user query is either greetings, ambiguous, not clear or out of scope. Please provide appropriate response to the user.
     User query: {query}
     Intent: {intent}
@@ -37,7 +37,7 @@ def base_prompt(intent, query):
     return prompt
 
 def followup_query_prompt(query):
-    prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question. 
+    prompt = f"""<|im_start|>system\nYou are a WizSearch.AI an search expert that helps answering question. 
     Role: Follow-up Question Creator.
     TASK: Create two follow-up question's user can potentially ask based on the previous query.
     Give the response in ARRAY format:
@@ -77,7 +77,7 @@ def standalone_query_prompt(history=None):
     return prompt_str
 
 def search_rag_prompt(search_results, history=None):
-    system_prompt = f"""<|im_start|>system\nYou are a SearchWiz.AI an search expert that helps answering question, 
+    system_prompt = f"""<|im_start|>system\nYou are a WizSearch.AI an search expert that helps answering question, 
     utilize the search information to their fullest potential to provide additional information and assistance in your response.
     SEARCH INFORMATION is below:
     ---------------------
