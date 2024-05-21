@@ -33,6 +33,12 @@ async def main():
         if not st.session_state.vectorstore:
             if st.button("📚 Add document to chat"):
                 upload_document()
+        else:
+            if st.button("🗑️ Remove document from chat"):
+                st.session_state.vectorstore = False
+                st.session_state.collection_name = None
+                clear_chat_history()
+                st.rerun()
 
     side_info()
     display_chat_messages(st.session_state.messages)
