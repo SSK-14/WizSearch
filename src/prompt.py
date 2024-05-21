@@ -85,7 +85,7 @@ def search_rag_prompt(search_results, history=None):
     ---------------------
     RULES:
     1. Only Answer the USER QUESTION using the INFORMATION.
-    2. Include source link and images in the answer.
+    2. Include source link/info in the answer.
     3. Respond in markdown format.
     <|im_end|>\n
     """

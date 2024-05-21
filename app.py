@@ -3,8 +3,9 @@ import streamlit as st
 from langfuse import Langfuse
 from src.sidebar import side_info
 from src.model import llm_generate, llm_stream
+from src.vectorstore import search_collection
 from src.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
-from src.ui import display_search_result, display_chat_messages, abort_chat, feedback
+from src.ui import display_search_result, display_chat_messages, abort_chat, feedback, upload_document
 from tavily import TavilyClient
 
 os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
@@ -22,8 +23,17 @@ def clear_chat_history():
 if "messages" not in st.session_state:
     clear_chat_history()
 
+if "vectorstore" not in st.session_state:
+    st.session_state.vectorstore = False
+
 async def main():
     st.title("🔍 :orange[AI] Playground")
+
+    if len(st.session_state.messages) == 1:
+        if not st.session_state.vectorstore:
+            if st.button("📚 Add document to chat"):
+                upload_document()
+
     side_info()
     display_chat_messages(st.session_state.messages)
 
@@ -47,19 +57,30 @@ async def main():
                         st.write(f"❓ Standalone query: {query}")
                     query = await llm_generate(query_formatting_prompt(query), trace, "Query Formatting")
                     st.write(f"📝 Search query: {query}")
-                    st.write("🌐 Searching the web...")
-                    retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)
-                    search_results = tavily.search(query, search_depth="advanced", include_images=True)
-                    retrieval.end(output=search_results)
-                    if search_results["results"]:
-                        followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(query), trace, "Follow-up Query"))
-                        search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
-                        st.json(search_results, expanded=False)
-                        prompt = search_rag_prompt(search_context, st.session_state.messages)
-                        status.update(label="Done and dusted!", state="complete", expanded=False)
+
+                    if st.session_state.vectorstore:
+                        st.write("📚 Searching the document...")
+                        retrieval = trace.span(name="Retrieval", metadata={"search": "document"}, input=query)
+                        search_results = search_collection(query)
+                        retrieval.end(output=search_results)
+                        if search_results:
+                            followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(query), trace, "Follow-up Query"))
+                            prompt = search_rag_prompt(search_results, st.session_state.messages)
+                            status.update(label="Done and dusted!", state="complete", expanded=False)
                     else:
-                        trace.update(output="No search results found", level="WARNING")
-                        abort_chat("I'm sorry, There was an error in search. Please try again.")
+                        st.write("🌐 Searching the web...")
+                        retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)
+                        search_results = tavily.search(query, search_depth="advanced", include_images=True)
+                        retrieval.end(output=search_results)                
+                        if search_results["results"]:
+                            followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(query), trace, "Follow-up Query"))
+                            search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
+                            st.json(search_results, expanded=False)
+                            prompt = search_rag_prompt(search_context, st.session_state.messages)
+                            status.update(label="Done and dusted!", state="complete", expanded=False)
+                        else:
+                            trace.update(output="No search results found", level="WARNING")
+                            abort_chat("I'm sorry, There was an error in search. Please try again.")
                 else:
                     prompt = base_prompt(intent, query)
                     status.update(label="Done and dusted!", state="complete", expanded=False)
@@ -68,7 +89,11 @@ async def main():
             abort_chat(f"An error occurred: {e}")
 
         if search_results:
-            display_search_result(search_results)
+            if st.session_state.vectorstore:
+                with st.expander("Document Result", expanded=False):
+                    st.json(search_results, expanded=False)
+            else:
+                display_search_result(search_results)
             followup_query = await followup_query_asyncio
             st.session_state.followup_query = json.loads(followup_query)
   

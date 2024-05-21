@@ -1,5 +1,9 @@
+import secrets
 import streamlit as st
+import PyPDF2
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
+from src.vectorstore import create_collection_and_insert
 
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.svg", "user": "👤"}
@@ -8,17 +12,19 @@ def display_chat_messages(messages):
             st.markdown(message["content"])
 
 def display_search_result(search_results):
-    with st.expander("Image Results", expanded=False):
-        col1, col2, col3, col4, col5 = st.columns(5)
-        col1.image(search_results["images"][0], use_column_width=True)
-        col2.image(search_results["images"][1], use_column_width=True)
-        col3.image(search_results["images"][2], use_column_width=True)
-        col4.image(search_results["images"][3], use_column_width=True)
-        col5.image(search_results["images"][4], use_column_width=True)
+    if search_results["images"]:
+        with st.expander("Image Results", expanded=False):
+            col1, col2, col3, col4, col5 = st.columns(5)
+            col1.image(search_results["images"][0], use_column_width=True)
+            col2.image(search_results["images"][1], use_column_width=True)
+            col3.image(search_results["images"][2], use_column_width=True)
+            col4.image(search_results["images"][3], use_column_width=True)
+            col5.image(search_results["images"][4], use_column_width=True)
 
     with st.expander("Search Results", expanded=False):
-        for result in search_results["results"]:
-            st.write(f"- [{result['title']}]({result['url']})")
+        if search_results["results"]:
+            for result in search_results["results"]:
+                st.write(f"- [{result['title']}]({result['url']})")
 
 def abort_chat(error_message: str):
     assert error_message, "Error message must be provided."
@@ -47,3 +53,34 @@ def feedback():
                 value=scores[feedback["score"]],
                 comment=feedback["text"],
             )
+
+@st.experimental_dialog("Upload your PDF files")
+def upload_document():
+    uploaded_files = st.file_uploader("Upload PDF files", accept_multiple_files=True, type="pdf")
+    col1, col2 = st.columns(2)
+    col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
+    col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
+
+    if uploaded_files:
+        if st.button("Submit"):
+            text = []
+            metadatas = []
+            st.session_state.collection_name = secrets.token_urlsafe(8)
+            for file in uploaded_files:
+                pdf_reader = PyPDF2.PdfReader(file)
+                page_number = 1
+                for page in pdf_reader.pages:
+                    text.append(page.extract_text())
+                    metadatas.append({"page": page_number, "file": file.name})
+                    page_number += 1
+
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=st.session_state.get("chunk_size") or 500,
+                chunk_overlap=st.session_state.get("chunk_overlap") or 80,
+                separators=["\n\n", "\n", " ", ""],
+            )
+
+            chunks = text_splitter.create_documents(text, metadatas=metadatas)
+            create_collection_and_insert(chunks)
+            st.session_state.vectorstore = True
+            st.rerun()

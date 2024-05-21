@@ -4,3 +4,7 @@ langfuse==2.32.0
 streamlit-feedback==0.1.3
 replicate
 transformers
+langchain-text-splitters
+qdrant-client[fastembed]
+fastembed
+pypdf2
