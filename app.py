@@ -26,6 +26,9 @@ if "messages" not in st.session_state:
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = False
 
+if "followup_query" not in st.session_state:
+    st.session_state.followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
+
 async def main():
     st.title("🔍 :orange[AI] Playground")
 
@@ -44,7 +47,6 @@ async def main():
     display_chat_messages(st.session_state.messages)
 
     search_results = None
-    st.session_state.followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
     if st.session_state.messages[-1]["role"] != "assistant":
         query = st.session_state.messages[-1]["content"]
         trace = langfuse.trace(name="AI Search", input=query)
@@ -125,6 +127,8 @@ async def main():
         else:
             if st.button("Ask Wiz", type="primary"):
                 st.session_state.messages.append({"role": "user", "content": selected_followup_query})
+                st.selected_followup_query = None
+                st.session_state.followup_query = []
                 st.rerun()
 
 
