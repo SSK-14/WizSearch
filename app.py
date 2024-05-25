@@ -1,12 +1,13 @@
 import os, asyncio, json 
 import streamlit as st
 from langfuse import Langfuse
-from src.sidebar import side_info
-from src.model import llm_generate, llm_stream
-from src.vectorstore import search_collection
-from src.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
-from src.ui import display_search_result, display_chat_messages, abort_chat, feedback, upload_document
 from tavily import TavilyClient
+from src.components.sidebar import side_info
+from src.modules.model import llm_generate, llm_stream
+from src.modules.vectorstore import search_collection
+from src.modules.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
+from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions
+from src.utils import initialise_session_state, clear_chat_history, abort_chat
 
 os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
 os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
@@ -16,34 +17,13 @@ os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
 tavily = TavilyClient(api_key=st.secrets['TAVILY_API_KEY'])
 langfuse = Langfuse()
 
-def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant using [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). Ask me anything you are looking for 🪄."}]
-    st.session_state.chat_aborted = False
-
-if "messages" not in st.session_state:
-    clear_chat_history()
-
-if "vectorstore" not in st.session_state:
-    st.session_state.vectorstore = False
-
-if "followup_query" not in st.session_state:
-    st.session_state.followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
-
 async def main():
     st.title("🔍 :orange[AI] Playground")
+    initialise_session_state()
+    side_info()
 
     if len(st.session_state.messages) == 1:
-        if not st.session_state.vectorstore:
-            if st.button("📚 Add document to chat"):
-                upload_document()
-        else:
-            if st.button("🗑️ Remove document from chat"):
-                st.session_state.vectorstore = False
-                st.session_state.collection_name = None
-                clear_chat_history()
-                st.rerun()
-
-    side_info()
+        document()
     display_chat_messages(st.session_state.messages)
 
     search_results = None
@@ -97,11 +77,7 @@ async def main():
             abort_chat(f"An error occurred: {e}")
 
         if search_results:
-            if st.session_state.vectorstore:
-                with st.expander("Document Result", expanded=False):
-                    st.json(search_results, expanded=False)
-            else:
-                display_search_result(search_results)
+            display_search_result(search_results)
             followup_query = await followup_query_asyncio
             st.session_state.followup_query = json.loads(followup_query)
   
@@ -120,16 +96,7 @@ async def main():
         col1.button('New Chat', on_click=clear_chat_history)
         with col2:
             feedback()
-                
-        selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
-        if selected_followup_query is None:
-            st.stop()
-        else:
-            if st.button("Ask Wiz", type="primary"):
-                st.session_state.messages.append({"role": "user", "content": selected_followup_query})
-                st.selected_followup_query = None
-                st.session_state.followup_query = []
-                st.rerun()
+        followup_questions()
 
 
 if __name__ == "__main__":

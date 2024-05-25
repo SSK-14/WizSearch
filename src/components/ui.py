@@ -3,7 +3,8 @@ import streamlit as st
 import PyPDF2
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
-from src.vectorstore import create_collection_and_insert
+from src.modules.vectorstore import create_collection_and_insert
+from src.utils import clear_chat_history
 
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.svg", "user": "👤"}
@@ -12,29 +13,24 @@ def display_chat_messages(messages):
             st.markdown(message["content"])
 
 def display_search_result(search_results):
-    if search_results["images"]:
-        with st.expander("Image Results", expanded=False):
-            col1, col2, col3, col4, col5 = st.columns(5)
-            col1.image(search_results["images"][0], use_column_width=True)
-            col2.image(search_results["images"][1], use_column_width=True)
-            col3.image(search_results["images"][2], use_column_width=True)
-            col4.image(search_results["images"][3], use_column_width=True)
-            col5.image(search_results["images"][4], use_column_width=True)
-
-    with st.expander("Search Results", expanded=False):
-        if search_results["results"]:
-            for result in search_results["results"]:
-                st.write(f"- [{result['title']}]({result['url']})")
-
-def abort_chat(error_message: str):
-    assert error_message, "Error message must be provided."
-    error_message = f":red[{error_message}]"
-    if st.session_state.messages[-1]["role"] != "assistant":
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
+    if st.session_state.vectorstore:
+        with st.expander("Document Result", expanded=False):
+            st.json(search_results, expanded=False)
     else:
-        st.session_state.messages[-1]["content"] = error_message
-    st.session_state.chat_aborted = True
-    st.rerun()
+        if search_results["images"]:
+            with st.expander("Image Results", expanded=False):
+                col1, col2, col3, col4, col5 = st.columns(5)
+                col1.image(search_results["images"][0], use_column_width=True)
+                col2.image(search_results["images"][1], use_column_width=True)
+                col3.image(search_results["images"][2], use_column_width=True)
+                col4.image(search_results["images"][3], use_column_width=True)
+                col5.image(search_results["images"][4], use_column_width=True)
+
+        with st.expander("Search Results", expanded=False):
+            if search_results["results"]:
+                for result in search_results["results"]:
+                    st.write(f"- [{result['title']}]({result['url']})")
+
 
 def feedback():
     trace = st.session_state.trace
@@ -53,6 +49,18 @@ def feedback():
                 value=scores[feedback["score"]],
                 comment=feedback["text"],
             )
+
+def followup_questions():
+    selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
+    if selected_followup_query is None:
+        st.stop()
+    else:
+        if st.button("Ask Wiz", type="primary"):
+            st.session_state.messages.append({"role": "user", "content": selected_followup_query})
+            st.selected_followup_query = None
+            st.session_state.followup_query = []
+            st.rerun()
+
 
 @st.experimental_dialog("Upload your PDF files")
 def upload_document():
@@ -83,4 +91,15 @@ def upload_document():
             chunks = text_splitter.create_documents(text, metadatas=metadatas)
             create_collection_and_insert(chunks)
             st.session_state.vectorstore = True
+            st.rerun()
+
+def document():
+    if not st.session_state.vectorstore:
+        if st.button("📚 Add document to chat"):
+            upload_document()
+    else:
+        if st.button("🗑️ Remove document from chat"):
+            st.session_state.vectorstore = False
+            st.session_state.collection_name = None
+            clear_chat_history()
             st.rerun()
