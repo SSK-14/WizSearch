@@ -7,7 +7,7 @@ from src.modules.vectorstore import create_collection_and_insert
 from src.utils import clear_chat_history
 
 def display_chat_messages(messages):
-    icons = {"assistant": "./src/assets/logo.svg", "user": "👤"}
+    icons = {"assistant": "./src/assets/logo.png", "user": "👤"}
     for message in messages:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.markdown(message["content"])
@@ -62,14 +62,14 @@ def followup_questions():
             st.rerun()
 
 
-@st.experimental_dialog("Upload your PDF files")
+@st.experimental_dialog("Upload your documents")
 def upload_document():
     uploaded_files = st.file_uploader("Upload PDF files", accept_multiple_files=True, type="pdf")
-    col1, col2 = st.columns(2)
-    col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
-    col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
 
     if uploaded_files:
+        col1, col2 = st.columns(2)
+        col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
+        col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
         if st.button("Submit"):
             text = []
             metadatas = []

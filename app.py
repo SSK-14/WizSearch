@@ -1,26 +1,26 @@
 import os, asyncio, json 
 import streamlit as st
 from langfuse import Langfuse
-from tavily import TavilyClient
 from src.components.sidebar import side_info
-from src.modules.model import llm_generate, llm_stream
+from src.modules.model import llm_generate, llm_stream, initialise_replicate
 from src.modules.vectorstore import search_collection
 from src.modules.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
 from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
+from src.modules.search import initialise_tavily
 
-os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
 os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
 os.environ["LANGFUSE_PUBLIC_KEY"] = st.secrets["LANGFUSE_PUBLIC_KEY"]
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" 
 
-tavily = TavilyClient(api_key=st.secrets['TAVILY_API_KEY'])
 langfuse = Langfuse()
 
 async def main():
     st.title("🔍 :orange[AI] Playground")
-    initialise_session_state()
     side_info()
+    initialise_session_state()
+    initialise_replicate()
+    tavily = initialise_tavily()
 
     if len(st.session_state.messages) == 1:
         document()
@@ -81,7 +81,7 @@ async def main():
             followup_query = await followup_query_asyncio
             st.session_state.followup_query = json.loads(followup_query)
   
-        with st.chat_message("assistant", avatar="./src/assets/logo.svg"):
+        with st.chat_message("assistant", avatar="./src/assets/logo.png"):
             st.write_stream(llm_stream(prompt, trace, "Final Answer"))
         trace.update(output=st.session_state.messages[-1]["content"])
         

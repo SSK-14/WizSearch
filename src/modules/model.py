@@ -1,5 +1,15 @@
+import os
 import streamlit as st
 import replicate
+
+def initialise_replicate():
+    if "REPLICATE_API_TOKEN" in st.secrets:
+        os.environ['REPLICATE_API_TOKEN'] = st.secrets['REPLICATE_API_TOKEN']
+    elif st.session_state.replicate_api_key:
+        os.environ['REPLICATE_API_TOKEN'] = st.session_state.replicate_api_key
+    else:
+        st.warning('Please provide Replicate API key in the sidebar.', icon="⚠️")
+        st.stop()
 
 MODEL = "snowflake/snowflake-arctic-instruct"
 
