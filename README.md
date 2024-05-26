@@ -2,7 +2,6 @@
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
 ## How we built it 🛠️
-
 We built Wiz Search using the following components:
 - **LLM:** [Snowflakes Arctic LLM](https://www.snowflake.com/en/data-cloud/arctic/) for natural language understanding and generation.
 - **Embeddings:** [Snowflakes Arctic Embedding Model](https://www.snowflake.com/blog/introducing-snowflake-arctic-embed-snowflakes-state-of-the-art-text-embedding-family-of-models/) to enhance search relevance.
@@ -12,6 +11,8 @@ We built Wiz Search using the following components:
 - **UI:** [Streamlit](https://streamlit.io/) for creating an interactive and user-friendly interface.
 
 We focused on creating a modular architecture without relying on LangChain, allowing for a more customizable and flexible design.
+
+![Architecture](./src/assets/arch.png)
 
 ## Run The Application ⚙️
 
