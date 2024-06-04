@@ -2,7 +2,7 @@ import os, asyncio, json
 import streamlit as st
 from langfuse import Langfuse
 from src.components.sidebar import side_info
-from src.modules.model import llm_generate, llm_stream, initialise_replicate
+from src.modules.model import llm_generate, llm_stream, initialise_model
 from src.modules.vectorstore import search_collection
 from src.modules.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
 from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions
@@ -19,7 +19,7 @@ async def main():
     st.title("🔍 :orange[AI] Playground")
     side_info()
     initialise_session_state()
-    initialise_replicate()
+    initialise_model()
     tavily = initialise_tavily()
 
     if len(st.session_state.messages) == 1:
@@ -79,8 +79,12 @@ async def main():
         if search_results:
             display_search_result(search_results)
             followup_query = await followup_query_asyncio
-            st.session_state.followup_query = json.loads(followup_query)
-  
+            if followup_query:
+                try:
+                    st.session_state.followup_query = json.loads(followup_query)
+                except json.JSONDecodeError:
+                    st.session_state.followup_query = []
+
         with st.chat_message("assistant", avatar="./src/assets/logo.png"):
             st.write_stream(llm_stream(prompt, trace, "Final Answer"))
         trace.update(output=st.session_state.messages[-1]["content"])

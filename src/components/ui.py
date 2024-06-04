@@ -51,15 +51,16 @@ def feedback():
             )
 
 def followup_questions():
-    selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
-    if selected_followup_query is None:
-        st.stop()
-    else:
-        if st.button("Ask Wiz", type="primary"):
-            st.session_state.messages.append({"role": "user", "content": selected_followup_query})
-            st.selected_followup_query = None
-            st.session_state.followup_query = []
-            st.rerun()
+    if st.session_state.followup_query and len(st.session_state.followup_query) > 0:
+        selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
+        if selected_followup_query is None:
+            st.stop()
+        else:
+            if st.button("Ask Wiz", type="primary"):
+                st.session_state.messages.append({"role": "user", "content": selected_followup_query})
+                st.selected_followup_query = None
+                st.session_state.followup_query = []
+                st.rerun()
 
 
 @st.experimental_dialog("Upload your documents")
