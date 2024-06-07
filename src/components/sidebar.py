@@ -17,9 +17,9 @@ def side_info():
 
         if "TAVILY_API_KEY" not in st.secrets:
             st.text_input(
-                "Tavil API Key",
+                "Tavily API Key",
                 type="password",
-                placeholder="Paste your tavil key here",
+                placeholder="Paste your tavily key here",
                 help="You can get your API key from https://app.tavily.com/home",
                 key="tavily_api_key"
             )
