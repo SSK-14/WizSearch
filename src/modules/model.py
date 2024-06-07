@@ -1,5 +1,6 @@
 import streamlit as st
 from langchain_openai import ChatOpenAI
+from openai import OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 def initialise_model():
@@ -16,6 +17,7 @@ def initialise_model():
     
     if st.session_state.model_provider == "openai":
         st.session_state.llm = ChatOpenAI(model="gpt-4o", api_key=st.session_state.model_api_key)
+        st.session_state.openai_client = OpenAI(api_key=st.session_state.model_api_key)
     elif st.session_state.model_provider == "gemini":
         st.session_state.llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", google_api_key=st.session_state.model_api_key)
     else:

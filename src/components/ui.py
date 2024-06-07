@@ -53,9 +53,7 @@ def feedback():
 def followup_questions():
     if st.session_state.followup_query and len(st.session_state.followup_query) > 0:
         selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
-        if selected_followup_query is None:
-            st.stop()
-        else:
+        if selected_followup_query is not None:
             if st.button("Ask Wiz", type="primary"):
                 st.session_state.messages.append({"role": "user", "content": selected_followup_query})
                 st.selected_followup_query = None
