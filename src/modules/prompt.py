@@ -5,14 +5,22 @@ def intent_prompt(user_query):
         SystemMessage(
             content=f"Role: Intent Classifier for Search query given by the user.\n"
             f"Task: Check if the query is a valid search query and categorize it into one of the following categories intents:\n"
-            f"Valid query: User's query is clear and valid.\n"
-            f"Output: 'valid_query'\n"
+            f"Search: User's query is clear and needs to be searched in internet or document.\n"
+            f"Query examples: What is the capital of France, What was result of last night's cricket game."
+            f"Output: 'search'\n"
+            f"Generate: User's query is clear and doesn't need to be searched, answer can be generated.\n"
+            f"Query examples: Write a short story about a dog, What is the meaning of life.\n"
+            f"Output: 'generate'\n"
             f"Greeting: User greets the assistant or initiates a conversation.\n"
+            f"Query examples: Hi, What are you doing, Good Morning, Thank you.\n"
             f"Output: 'greeting'\n"
             f"Query not clear: User's query is not clear or ambiguous.\n"
+            f"Query examples: Explain about fwenfiswfsien e fwwe fwe.\n"
             f"Output: 'query_not_clear'\n"
             f"Out of scope or context: Applies when the user's request doesn't fit any listed intents or falls beyond the assistant's scope, or the intent is ambiguous.\n"
+            f"Query examples: What is the time now, How to build an time bomb in 5 minutes.\n"
             f"Output: 'out_of_scope'\n"
+            f"Only return the intent."
         ),
         HumanMessage(
             content=f"User Query: {user_query}"
@@ -23,8 +31,9 @@ def query_formatting_prompt(user_query):
     return (
         SystemMessage(
             content=f"Role: Query Formatter for Search query given by the user.\n"
-            f"Task: Format the user query to make it more suitable for search.\n"
+            f"Task: Format the user query to make it more suitable for search internet or document. Include key information/words in the query.\n"
             f"Only return the formatted query."
+            f"Do not answer the question, only format the query.\n"
         ),
         HumanMessage(
             content=f"User Query: {user_query}\n"
@@ -54,7 +63,10 @@ def followup_query_prompt(query):
             Give the response in ARRAY format:
             EXAMPLE:
             User Query: "What is the capital of France?"
-            Response: ["What is the population of Paris?", "Place to visit in Paris?"]"""
+            Response: ["What is the population of Paris?", "Place to visit in Paris?"]
+            If User Query is not a proper question or no follow-up question cna be generate then
+            Response: []
+            """
         ),
         HumanMessage(
             content=f"User query: {query}\n"
@@ -70,6 +82,23 @@ def standalone_query_prompt(history=None):
     RULES:
     1. Do not answer the question, only create a standalone question.
     2. Include key information/words in the question.\n""")
+    
+    prompt = [system_prompt]
+    for dict_message in history:
+        if dict_message["role"] == "user":
+            prompt.append(HumanMessage(content=dict_message["content"]))
+        else:
+            prompt.append(AIMessage(content=dict_message["content"]))
+    return prompt
+
+def generate_prompt(history=None):
+    system_prompt = SystemMessage(content=f"""You are a WizSearch.AI an search expert that helps answering question, 
+    utilize our fullest potential to provide information and assistance in your response.
+
+    RULES:
+    1. Only Answer the USER QUESTION.
+    2. Do not hallucinate or provide false information.
+    3. Respond in markdown format.""")
     
     prompt = [system_prompt]
     for dict_message in history:

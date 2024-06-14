@@ -24,6 +24,9 @@ def initialise_session_state():
     if "vectorstore" not in st.session_state:
         st.session_state.vectorstore = False
 
+    if "search_results" not in st.session_state:
+        st.session_state.search_results = None
+
     if "followup_query" not in st.session_state:
-        st.session_state.followup_query = ["Give me a comparison of apple vision pro vs meta quest ?", "Give a summary of googles new gemini model ?"]
+        st.session_state.followup_query = []
   
