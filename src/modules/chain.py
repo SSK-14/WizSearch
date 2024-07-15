@@ -5,8 +5,6 @@ from src.modules.prompt import intent_prompt, search_rag_prompt, standalone_quer
 from src.utils import abort_chat
 from src.modules.search import initialise_tavily
 
-tavily = initialise_tavily()
-
 async def process_query():
     trace = st.session_state.trace
     query = st.session_state.messages[-1]["content"]
@@ -30,6 +28,7 @@ async def search_vectorstore(query):
         return search_rag_prompt(search_results, st.session_state.messages)
 
 async def search_tavily(query):
+    tavily = initialise_tavily()
     trace = st.session_state.trace
     st.write("🌐 Searching the web...")
     retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)

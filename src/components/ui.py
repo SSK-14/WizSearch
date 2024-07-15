@@ -83,10 +83,12 @@ def upload_document():
     uploaded_files = st.file_uploader("Upload PDF files", accept_multiple_files=True, type="pdf")
 
     if uploaded_files:
-        col1, col2 = st.columns(2)
-        col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
-        col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
-        if st.button("Submit"):
+        with st.expander("Advanced Options"):
+            col1, col2 = st.columns(2)
+            col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
+            col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
+        _col1, col, _col2 = st.columns([1, 2, 1])
+        if col.button("Submit", use_container_width=True, type="primary"):
             text = []
             metadatas = []
             st.session_state.collection_name = secrets.token_urlsafe(8)
