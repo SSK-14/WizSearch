@@ -1,33 +1,27 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from openai import OpenAI
+from langchain_community.chat_models import ChatOllama
 
-MODEL_PROVIDER = "openai"
+MODEL_PROVIDER = "ollama"
 
 model_options = {
-    "GPT-4o": "gpt-4o",
-    "GPT-3.5 Turbo-16k": "gpt-3.5-turbo-16k",
-    "GPT-4 Turbo": "gpt-4-1106-preview",
-    "GPT-4": "gpt-4",
+    "Meta Llama 3": "llama3",
+    "Phi-3": "phi3",
+    "Google Gemma 2": "gemma2",
+    "Mistral": "mistral",
 }
 
 def initialise_model():
     if "llm" not in st.session_state:
         st.session_state.llm = None
-    if "MODEL_API_TOKEN" in st.secrets:
-        model_api_token = st.secrets['MODEL_API_TOKEN']
-        st.session_state.model_api_key = model_api_token
-    if "model_api_key" not in st.session_state:
-        st.warning('Please provide openai API key in the sidebar.', icon="⚠️")
-        st.stop()
-    st.session_state.llm = ChatOpenAI(
+    if "OLLAMA_SERVER_URL" in st.secrets:
+        ollama_server_url = st.secrets['OLLAMA_SERVER_URL']
+        st.session_state.ollama_server_url = ollama_server_url
+    st.session_state.llm = ChatOllama(
         model=model_options[st.session_state.model_name] or "gpt-4o",
         temperature=st.session_state.temperature or 0.1,
         max_tokens=st.session_state.max_tokens or 2500,
-        api_key=st.session_state.model_api_key
+        base_url=st.session_state.ollama_server_url
     )
-    st.session_state.openai_client = OpenAI(api_key=st.session_state.model_api_key)
-
 
 async def llm_generate(prompt, trace, name="llm-generate"):
     generation = trace.generation(

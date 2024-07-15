@@ -6,7 +6,6 @@ from src.modules.model import llm_generate, llm_stream, initialise_model
 from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt
 from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
-from src.modules.speech import stt
 from src.modules.chain import process_query, search_tavily , search_vectorstore
 
 os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
@@ -85,9 +84,6 @@ async def main():
         st.chat_input("Enter your search query here...", disabled=True)
     elif query := st.chat_input("Enter your search query here..."):
         st.session_state.messages.append({"role": "user", "content": query})
-        st.rerun()
-    elif voice_query := stt():
-        st.session_state.messages.append({"role": "user", "content": voice_query})
         st.rerun()
 
 if __name__ == "__main__":

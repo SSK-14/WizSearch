@@ -3,7 +3,7 @@ Your intelligent ally for effortless data retrieval across documents and seamles
 
 ## How we built it 🛠️
 We built Wiz Search using the following components:
-- **LLM:** [OpenAI](https://platform.openai.com) [Gemini](https://aistudio.google.com) for natural language understanding and generation.
+- **LLM:** Open source models like llama3, mistral, gemma, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
 - **Embeddings:** [BAAI/bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5) to enhance search relevance.
 - **Intelligent Search:** [Tavily](https://tavily.com/) for advanced search capabilities.
 - **Vector Databases:** [Qdrant](https://qdrant.tech/) for efficient data storage and retrieval.

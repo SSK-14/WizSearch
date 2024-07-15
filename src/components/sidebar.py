@@ -7,13 +7,12 @@ def side_info():
         st.image("src/assets/logo.png")
         st.markdown(">🌟 Your super-smart AI assistant! Just ask, and watch as it finds exactly what you need, like magic!")
 
-        if "MODEL_API_TOKEN" not in st.secrets:
+        if "OLLAMA_SERVER_URL" not in st.secrets:
             st.text_input(
-                "Openai API Key",
-                type="password",
-                placeholder="Paste your api key here",
-                help="You can get your API key from https://platform.openai.com/account/api-keys",
-                key="model_api_key"
+                "Ollama Server Url",
+                placeholder="Paste your url here",
+                value="http://localhost:11434",
+                key="ollama_server_url"
             )
 
         if "TAVILY_API_KEY" not in st.secrets:
