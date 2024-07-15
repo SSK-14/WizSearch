@@ -6,13 +6,6 @@ def side_info():
         st.image("src/assets/logo.png")
         st.markdown(">🌟 Your super-smart AI assistant! Just ask, and watch as it finds exactly what you need, like magic!")
 
-        if "MODEL_PROVIDER" not in st.secrets:
-            st.selectbox(
-                "Select Model Provider",
-                ["openai", "gemini"],
-                key="model_provider"
-            )
-
         if "MODEL_API_TOKEN" not in st.secrets:
             st.text_input(
                 "Model API Key",

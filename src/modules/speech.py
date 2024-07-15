@@ -5,12 +5,11 @@ from streamlit_mic_recorder import mic_recorder
 def transcribe_audio(audio_bio, max_retries=3):
     for _ in range(max_retries):
         try:
-            if st.session_state.model_provider == "openai":
-                transcript = st.session_state.openai_client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio_bio,
-                )
-                return transcript.text
+            transcript = st.session_state.openai_client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_bio,
+            )
+            return transcript.text
         except Exception as e:
             print(str(e))  
     return None
@@ -26,7 +25,7 @@ def stt(key="speech-to-text"):
         st.session_state[key + '_output'] = None
 
     col1, col2, col3 = st.columns(3)
-    if st.session_state.model_provider == "openai":
+    if st.session_state.model_api_key:
         with col2:
             audio = mic_recorder(
                 start_prompt="🎙️ Ask Your Question",
