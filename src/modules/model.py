@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from openai import OpenAI
 
 MODEL_PROVIDER = "openai"
@@ -26,6 +26,7 @@ def initialise_model():
         max_tokens=st.session_state.max_tokens or 2500,
         api_key=st.session_state.model_api_key
     )
+    st.session_state.embeddings = OpenAIEmbeddings(api_key=st.session_state.model_api_key, model="text-embedding-3-small")
     st.session_state.openai_client = OpenAI(api_key=st.session_state.model_api_key)
 
 

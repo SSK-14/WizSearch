@@ -1,19 +1,14 @@
 import streamlit as st
 from qdrant_client import QdrantClient
-from fastembed import TextEmbedding
 from qdrant_client.models import VectorParams, Distance, PointStruct
 
 qdrant_client = QdrantClient(":memory:")
-embedding_model = TextEmbedding(
-    model_name="BAAI/bge-small-en-v1.5", 
-    providers=["CPUExecutionProvider"]
-)
 
 def create_collection_and_insert(documents):
     collection = st.session_state.collection_name
     texts = [doc.page_content for doc in documents]
     metadata = [doc.metadata for doc in documents]
-    embeddings = embedding_model.embed(texts)
+    embeddings = st.session_state.embeddings.embed_documents(texts)
     points = [
         PointStruct(
             id=idx,
@@ -25,7 +20,7 @@ def create_collection_and_insert(documents):
     qdrant_client.create_collection(
         collection,
         vectors_config=VectorParams(
-            size=384,
+            size=1536,
             distance=Distance.COSINE,
         ),
     )
@@ -33,7 +28,7 @@ def create_collection_and_insert(documents):
 
 
 def search_collection(query, top_k=4):
-    query_embedding = next(embedding_model.query_embed(query))
+    query_embedding = st.session_state.embeddings.embed_query(query)
     search_results = qdrant_client.search(
         collection_name=st.session_state.collection_name,
         query_vector=query_embedding,

@@ -1,12 +1,10 @@
 # WizSearch [Openai] [**Demo**](https://wizsearch-openai.streamlit.app/) 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
-
-
 ## How we built it 🛠️
 We built Wiz Search using the following components:
 - **LLM:** [OpenAI](https://platform.openai.com) for natural language understanding and generation.
-- **Embeddings:** [BAAI/bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5) to enhance search relevance.
+- **Embeddings:** [text-embedding-3-small](https://openai.com/index/new-embedding-models-and-api-updates/) to enhance search relevance.
 - **Intelligent Search:** [Tavily](https://tavily.com/) for advanced search capabilities.
 - **Vector Databases:** [Qdrant](https://qdrant.tech/) for efficient data storage and retrieval.
 - **Observability:** [Langfuse](https://www.langfuse.com/) for monitoring and observability.

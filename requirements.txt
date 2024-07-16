@@ -6,10 +6,7 @@ openai
 streamlit-mic-recorder
 langchain-community==0.2.1
 langchain-core==0.2.3
-langchain-google-genai==1.0.5
 langchain-openai==0.1.8
-transformers
 langchain-text-splitters
-qdrant-client[fastembed]
-fastembed
+qdrant-client
 pypdf2
