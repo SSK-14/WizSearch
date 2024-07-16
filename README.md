@@ -1,6 +1,10 @@
 # WizSearch 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
+## Versions 📁
+- [replicate](https://github.com/SSK-14/WizSearch/tree/replicate)
+- [openai](https://github.com/SSK-14/WizSearch/tree/openai)
+
 ## How we built it 🛠️
 We built Wiz Search using the following components:
 - **LLM:** Open source models like llama3, mistral, gemma, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
