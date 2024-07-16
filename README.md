@@ -1,9 +1,15 @@
 # WizSearch 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
-## Versions 📁
-- [replicate](https://github.com/SSK-14/WizSearch/tree/replicate)
-- [openai](https://github.com/SSK-14/WizSearch/tree/openai)
+- **Ollama** : Connects to large language models via the Ollama server 
+[🔗 Demo](https://wizsearch.streamlit.app/) |
+[💻 Code](https://github.com/SSK-14/WizSearch/tree/main) 
+- **Replicate** : Leverages the Replicate platform to integrate models
+[🔗 Demo](https://wizsearch-replicate.streamlit.app/) |
+[💻 Code](https://github.com/SSK-14/WizSearch/tree/replicate) 
+- **OpenAI** : Utilizes OpenAI's API for advanced language model capabilities.
+[🔗 Demo](https://wizsearch-openai.streamlit.app/) |
+[💻 Code](https://github.com/SSK-14/WizSearch/tree/openai) 
 
 ## How we built it 🛠️
 We built Wiz Search using the following components:
