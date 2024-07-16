@@ -5,7 +5,7 @@ def side_info():
     with st.sidebar:
         st.image("src/assets/title.png")
         st.image("src/assets/logo.png")
-        st.markdown(">🌟 Your super-smart AI assistant! Just ask, and watch as it finds exactly what you need, like magic!")
+        st.warning("🌟 Your super-smart AI assistant! Just ask, and watch as it finds exactly what you need, like magic!")
 
         if "OLLAMA_SERVER_URL" not in st.secrets:
             st.text_input(

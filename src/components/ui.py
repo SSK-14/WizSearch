@@ -61,20 +61,16 @@ def followup_questions():
                 st.rerun()
 
 def example_questions():
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     questions = [
-        "City with the most bike lanes",
-        "How is Perplexity AI different",
-        "Rumours about new iPhone", 
+        "What happened in T20 world cup 2024 final ?",
+        "Write a short poem on a tool 'Wiz search'.",
     ]
     if col1.button(questions[0]):
         st.session_state.messages.append({"role": "user", "content": questions[0]})
         st.rerun()
     if col2.button(questions[1]):
         st.session_state.messages.append({"role": "user", "content": questions[1]})
-        st.rerun()
-    if col3.button(questions[2]):
-        st.session_state.messages.append({"role": "user", "content": questions[2]})
         st.rerun()
 
 

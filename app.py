@@ -27,8 +27,6 @@ async def main():
     with st.container(height=height, border=False):
         display_chat_messages(st.session_state.messages)
             
-        if len(st.session_state.messages) == 1:
-            example_questions()
         st.session_state.search_results = None
         if st.session_state.messages[-1]["role"] != "assistant":
             query = st.session_state.messages[-1]["content"]
@@ -63,6 +61,7 @@ async def main():
             if followup_query_asyncio:
                 followup_query = await followup_query_asyncio
                 if followup_query:
+                    followup_query = "[" + followup_query.split("[")[1].split("]")[0] + "]"
                     try:
                         st.session_state.followup_query = json.loads(followup_query)
                     except json.JSONDecodeError:
@@ -79,7 +78,8 @@ async def main():
                 feedback()
             followup_questions()
 
-
+    if len(st.session_state.messages) == 1:
+        example_questions()
     if st.session_state.chat_aborted:
         st.chat_input("Enter your search query here...", disabled=True)
     elif query := st.chat_input("Enter your search query here..."):
