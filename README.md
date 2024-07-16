@@ -1,21 +1,22 @@
 # WizSearch 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
+## Versions 📁
+- [replicate](https://github.com/SSK-14/WizSearch/tree/replicate)
+- [openai](https://github.com/SSK-14/WizSearch/tree/openai)
+
 ## How we built it 🛠️
 We built Wiz Search using the following components:
-- **LLM:** [Snowflakes Arctic LLM](https://www.snowflake.com/en/data-cloud/arctic/) for natural language understanding and generation.
-- **Embeddings:** [Snowflakes Arctic Embedding Model](https://www.snowflake.com/blog/introducing-snowflake-arctic-embed-snowflakes-state-of-the-art-text-embedding-family-of-models/) to enhance search relevance.
+- **LLM:** Open source models like llama3, mistral, gemma, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
+- **Embeddings:** [BAAI/bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5) to enhance search relevance.
 - **Intelligent Search:** [Tavily](https://tavily.com/) for advanced search capabilities.
 - **Vector Databases:** [Qdrant](https://qdrant.tech/) for efficient data storage and retrieval.
 - **Observability:** [Langfuse](https://www.langfuse.com/) for monitoring and observability.
 - **UI:** [Streamlit](https://streamlit.io/) for creating an interactive and user-friendly interface.
 
-We focused on creating a modular architecture without relying on LangChain, allowing for a more customizable and flexible design.
-
 ![Architecture](./src/assets/arch.png)
 
 ## Run The Application ⚙️
-
 1. Clone the repo
 ```
 git clone https://github.com/SSK-14/WizSearch.git

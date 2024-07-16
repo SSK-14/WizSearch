@@ -4,7 +4,10 @@ from fastembed import TextEmbedding
 from qdrant_client.models import VectorParams, Distance, PointStruct
 
 qdrant_client = QdrantClient(":memory:")
-embedding_model = TextEmbedding("snowflake/snowflake-arctic-embed-s")
+embedding_model = TextEmbedding(
+    model_name="BAAI/bge-small-en-v1.5", 
+    providers=["CPUExecutionProvider"]
+)
 
 def create_collection_and_insert(documents):
     collection = st.session_state.collection_name

@@ -51,13 +51,27 @@ def feedback():
             )
 
 def followup_questions():
-    selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
-    if selected_followup_query is not None:
-        if st.button("Ask Wiz", type="primary"):
-            st.session_state.messages.append({"role": "user", "content": selected_followup_query})
-            st.selected_followup_query = None
-            st.session_state.followup_query = []
-            st.rerun()
+    if st.session_state.followup_query and len(st.session_state.followup_query) > 0:
+        selected_followup_query = st.radio("Follow-up Questions:", st.session_state.followup_query, index=None)
+        if selected_followup_query is not None:
+            if st.button("Ask Wiz", type="primary"):
+                st.session_state.messages.append({"role": "user", "content": selected_followup_query})
+                st.selected_followup_query = None
+                st.session_state.followup_query = []
+                st.rerun()
+
+def example_questions():
+    col1, col2 = st.columns(2)
+    questions = [
+        "What happened in T20 world cup 2024 final ?",
+        "Write a short poem on a tool 'Wiz search'.",
+    ]
+    if col1.button(questions[0]):
+        st.session_state.messages.append({"role": "user", "content": questions[0]})
+        st.rerun()
+    if col2.button(questions[1]):
+        st.session_state.messages.append({"role": "user", "content": questions[1]})
+        st.rerun()
 
 
 @st.experimental_dialog("Upload your documents")
@@ -65,10 +79,12 @@ def upload_document():
     uploaded_files = st.file_uploader("Upload PDF files", accept_multiple_files=True, type="pdf")
 
     if uploaded_files:
-        col1, col2 = st.columns(2)
-        col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
-        col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
-        if st.button("Submit"):
+        with st.expander("Advanced Options"):
+            col1, col2 = st.columns(2)
+            col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
+            col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
+        _col1, col, _col2 = st.columns([1, 2, 1])
+        if col.button("Submit", use_container_width=True, type="primary"):
             text = []
             metadatas = []
             st.session_state.collection_name = secrets.token_urlsafe(8)
