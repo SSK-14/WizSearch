@@ -5,7 +5,7 @@ from src.components.sidebar import side_info
 from src.modules.model import llm_generate, llm_stream, initialise_replicate
 from src.modules.vectorstore import search_collection
 from src.modules.prompt import intent_prompt, search_rag_prompt, base_prompt, query_formatting_prompt, standalone_query_prompt, followup_query_prompt
-from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions
+from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.search import initialise_tavily
 from src.modules.speech import stt
@@ -29,6 +29,8 @@ async def main():
     height = 700 if len(st.session_state.messages) > 1 else 640
     with st.container(height=height, border=False):
         display_chat_messages(st.session_state.messages)
+        if len(st.session_state.messages) == 1:
+            example_questions()
 
         search_results = None
         if st.session_state.messages[-1]["role"] != "assistant":
