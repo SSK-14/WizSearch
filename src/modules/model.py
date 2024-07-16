@@ -17,7 +17,7 @@ def initialise_model():
     if "MODEL_API_TOKEN" in st.secrets:
         model_api_token = st.secrets['MODEL_API_TOKEN']
         st.session_state.model_api_key = model_api_token
-    if "model_api_key" not in st.session_state:
+    if "model_api_key" not in st.session_state or not st.session_state.model_api_key:
         st.warning('Please provide openai API key in the sidebar.', icon="⚠️")
         st.stop()
     st.session_state.llm = ChatOpenAI(

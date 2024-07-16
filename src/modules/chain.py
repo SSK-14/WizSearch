@@ -9,7 +9,8 @@ async def process_query():
     trace = st.session_state.trace
     query = st.session_state.messages[-1]["content"]
     if len(st.session_state.messages) > 3:
-        query = await llm_generate(standalone_query_prompt(st.session_state.messages), trace, "Standalone Query")
+        history = st.session_state.messages[:-1]
+        query = await llm_generate(standalone_query_prompt(query, history), trace, "Standalone Query")
         st.write(f"❓ Standalone query: {query}")
     st.write("🔄 Processing your query...")
     intent = await llm_generate(intent_prompt(query), trace, "Intent")

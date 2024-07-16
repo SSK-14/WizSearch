@@ -64,6 +64,7 @@ async def main():
             if followup_query_asyncio:
                 followup_query = await followup_query_asyncio
                 if followup_query:
+                    followup_query = "[" + followup_query.split("[")[1].split("]")[0] + "]"
                     try:
                         st.session_state.followup_query = json.loads(followup_query)
                     except json.JSONDecodeError:
@@ -86,7 +87,7 @@ async def main():
     elif query := st.chat_input("Enter your search query here..."):
         st.session_state.messages.append({"role": "user", "content": query})
         st.rerun()
-    elif voice_query := stt():
+    if voice_query := stt():
         st.session_state.messages.append({"role": "user", "content": voice_query})
         st.rerun()
 
