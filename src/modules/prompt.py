@@ -76,6 +76,21 @@ def followup_query_prompt(query):
         ) 
     ) 
 
+def vision_query_prompt(query, image_data):
+    image_part = {
+        "type": "image_url",
+        "image_url": f"{image_data}",
+    }
+    text_part = {"type": "text", "text": f"User query: {query}\n"}
+    return (
+        SystemMessage(
+            content="""You are a WizSearch.AI an search expert that helps answering question,
+            utilize your fullest potential to provide information and assistance in your response.
+            """
+        ),
+        HumanMessage(content=[text_part, image_part])
+    ) 
+
 def standalone_query_prompt(query=None, history=None):
     return ( 
         SystemMessage(content=f"""Role: Standalone Question Creator.
@@ -97,7 +112,7 @@ def standalone_query_prompt(query=None, history=None):
 
 def generate_prompt(history=None):
     system_prompt = SystemMessage(content=f"""You are a WizSearch.AI an search expert that helps answering question, 
-    utilize our fullest potential to provide information and assistance in your response.
+    utilize your fullest potential to provide information and assistance in your response.
 
     RULES:
     1. Only Answer the USER QUESTION.

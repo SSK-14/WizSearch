@@ -3,10 +3,11 @@ import streamlit as st
 from langfuse import Langfuse
 from src.components.sidebar import side_info
 from src.modules.model import llm_generate, llm_stream, initialise_model
-from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt
-from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions
+from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt, vision_query_prompt
+from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import process_query, search_tavily , search_vectorstore
+
 
 os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
 os.environ["LANGFUSE_PUBLIC_KEY"] = st.secrets["LANGFUSE_PUBLIC_KEY"]
@@ -21,7 +22,11 @@ async def main():
     initialise_model()
 
     if len(st.session_state.messages) == 1:
-        document()
+        col1, col2, col = st.columns([3, 3, 7])
+        with col1:
+            document()
+        with col2:
+            add_image()
 
     height = 700 if len(st.session_state.messages) > 1 else 640
     with st.container(height=height, border=False):
@@ -37,8 +42,10 @@ async def main():
                 with st.status("🚀 AI at work...", expanded=True) as status:
                     query, intent = await process_query()
                     followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(query), trace, "Follow-up Query"))
-                        
-                    if "search" in intent:
+                    
+                    if st.session_state.image_data:
+                        prompt = vision_query_prompt(query, st.session_state.image_data)
+                    elif "search" in intent:
                         query = await llm_generate(query_formatting_prompt(query), trace, "Query Formatting")
                         st.write(f"📝 Search query: {query}")
                         if st.session_state.vectorstore:

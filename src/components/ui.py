@@ -1,10 +1,12 @@
 import secrets
 import streamlit as st
 import PyPDF2
+import base64
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
 from src.modules.vectorstore import create_collection_and_insert
 from src.utils import clear_chat_history
+from src.modules.model import model_options, vision_models
 
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.png", "user": "👤"}
@@ -107,9 +109,32 @@ def upload_document():
             st.session_state.vectorstore = True
             st.rerun()
 
+@st.experimental_dialog("Add Image to Chat")
+def upload_image():
+    uploaded_image = st.file_uploader("Upload Image", type=['png', 'jpg'])
+    if uploaded_image:
+        bytes_data = uploaded_image.getvalue()
+        base64_image = base64.b64encode(bytes_data).decode('utf-8')
+        image_format = uploaded_image.type.split('/')[-1]
+        image_data = f"data:image/{image_format};base64,{base64_image}"
+        st.session_state.image_data = image_data
+        st.rerun()
+
+def add_image():
+    if model_options[st.session_state.model_name] in vision_models:
+        if st.session_state.image_data:
+            if st.button("🔄 Change image"):
+                st.session_state.image_data = None
+                st.rerun()
+        else:
+            if st.button("🖼️ Add image"):
+                upload_image()
+    else:
+        st.session_state.image_data = None
+
 def document():
     if not st.session_state.vectorstore:
-        if st.button("📚 Add document to chat"):
+        if st.button("📚 Add documents"):
             upload_document()
     else:
         if st.button("🗑️ Remove document from chat"):

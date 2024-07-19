@@ -29,4 +29,7 @@ def initialise_session_state():
 
     if "followup_query" not in st.session_state:
         st.session_state.followup_query = []
+
+    if "image_data" not in st.session_state:
+        st.session_state.image_data = None
   
