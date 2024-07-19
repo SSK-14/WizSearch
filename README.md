@@ -1,19 +1,21 @@
 # WizSearch 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
-- **Ollama** : Connects to large language models via the Ollama server 
-[🔗 Demo](https://wizsearch.streamlit.app/) |
-[💻 Code](https://github.com/SSK-14/WizSearch/tree/main) 
-- **Replicate** : Leverages the Replicate platform to integrate models
-[🔗 Demo](https://wizsearch-replicate.streamlit.app/) |
-[💻 Code](https://github.com/SSK-14/WizSearch/tree/replicate) 
-- **OpenAI** : Utilizes OpenAI's API for advanced language model capabilities.
-[🔗 Demo](https://wizsearch-openai.streamlit.app/) |
-[💻 Code](https://github.com/SSK-14/WizSearch/tree/openai) 
+## Ollama Quick Start Guides 🚀
+Connects to large language models via the Ollama server.
+- [Setup Ollama](./docs/OLLAMA.md)
+- [🔗 Demo](https://wizsearch-ollama.streamlit.app/)
+
+## Demos 🧩
+| Platform  | Demo Link | Code Link |
+|-----------|-----------|-----------|
+| **Replicate** 🔄 | [🔗 Demo](https://wizsearch.streamlit.app/) | [💻 Code](https://github.com/SSK-14/WizSearch/tree/replicate) |
+| **OpenAI** 🧠 | [🔗 Demo](https://wizsearch-openai.streamlit.app/) | [💻 Code](https://github.com/SSK-14/WizSearch/tree/openai) |
+
 
 ## How we built it 🛠️
 We built Wiz Search using the following components:
-- **LLM:** Open source models like llama3, mistral, gemma, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
+- **LLM:** Open source models like llama3, mistral, LLaVA, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
 - **Embeddings:** [BAAI/bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5) to enhance search relevance.
 - **Intelligent Search:** [Tavily](https://tavily.com/) for advanced search capabilities.
 - **Vector Databases:** [Qdrant](https://qdrant.tech/) for efficient data storage and retrieval.

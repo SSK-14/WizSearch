@@ -27,7 +27,7 @@ def initialise_model():
 async def llm_generate(prompt, trace, name="llm-generate"):
     generation = trace.generation(
         name=name,
-        model=st.session_state.model_name,
+        model=model_options[st.session_state.model_name],
         input=prompt,
     )
     result = st.session_state.llm.invoke(prompt).content
@@ -37,7 +37,7 @@ async def llm_generate(prompt, trace, name="llm-generate"):
 def llm_stream(prompt, trace, name="llm-stream"):
     generation = trace.generation(
         name=name,
-        model=st.session_state.model_name,
+        model=model_options[st.session_state.model_name],
         input=prompt,
     )
     st.session_state.messages.append({"role": "assistant", "content": ""})
