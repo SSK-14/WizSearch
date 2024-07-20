@@ -105,6 +105,7 @@ def upload_document():
             )
 
             chunks = text_splitter.create_documents(text, metadatas=metadatas)
+
             create_collection_and_insert(chunks)
             st.session_state.vectorstore = True
             st.rerun()
@@ -123,21 +124,21 @@ def upload_image():
 def add_image():
     if model_options[st.session_state.model_name] in vision_models:
         if st.session_state.image_data:
-            if st.button("🔄 Change image"):
+            if st.button("🔄 Change image", use_container_width=True):
                 st.session_state.image_data = None
                 st.rerun()
         else:
-            if st.button("🖼️ Add image"):
+            if st.button("🖼️ Add image", use_container_width=True):
                 upload_image()
     else:
         st.session_state.image_data = None
 
 def document():
     if not st.session_state.vectorstore:
-        if st.button("📚 Add documents"):
+        if st.button("📚 Add documents", use_container_width=True):
             upload_document()
     else:
-        if st.button("🗑️ Remove document from chat"):
+        if st.button("🗑️ Remove documents", use_container_width=True):
             st.session_state.vectorstore = False
             st.session_state.collection_name = None
             clear_chat_history()

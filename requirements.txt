@@ -1,11 +1,10 @@
-streamlit==1.34.0
-tavily-python==0.3.3
-langfuse==2.32.0
+streamlit==1.36.0
+tavily-python==0.3.5
+langfuse==2.39.2
 streamlit-feedback==0.1.3
 langchain-community==0.2.1
 langchain-core==0.2.3
-transformers
 langchain-text-splitters
-qdrant-client[fastembed]
-fastembed
+qdrant-client==1.10.1
+fastembed==0.3.4
 pypdf2

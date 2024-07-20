@@ -12,7 +12,8 @@ def side_info():
                 "Ollama Server Url",
                 placeholder="Paste your url here",
                 value="http://localhost:11434",
-                key="ollama_server_url"
+                key="ollama_server_url",
+                help="Checkout [Ollama setup](https://github.com/SSK-14/WizSearch/blob/main/docs/OLLAMA.md)"
             )
 
         if "TAVILY_API_KEY" not in st.secrets:
