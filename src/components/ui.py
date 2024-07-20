@@ -78,7 +78,11 @@ def example_questions():
 
 @st.experimental_dialog("Upload your documents")
 def upload_document():
-    uploaded_files = st.file_uploader("Upload PDF files", accept_multiple_files=True, type="pdf")
+    uploaded_files = st.file_uploader(
+        "Upload PDF files", 
+        accept_multiple_files=True, 
+        type="pdf"
+    )
 
     if uploaded_files:
         with st.expander("Advanced Options"):
