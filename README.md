@@ -1,6 +1,8 @@
 # WizSearch 🌟
 Your intelligent ally for effortless data retrieval across documents and seamless browsing the web.
 
+https://github.com/user-attachments/assets/fa4fae96-6e78-474d-9d90-2e1d64833008
+
 ## Ollama Quick Start Guides 🚀
 Connects to large language models via the Ollama server.
 - [Setup Ollama](./docs/OLLAMA.md)
