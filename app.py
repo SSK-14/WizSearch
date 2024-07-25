@@ -22,7 +22,7 @@ async def main():
     initialise_model()
 
     if len(st.session_state.messages) == 1:
-        col1, col2, col = st.columns([4, 3, 8])
+        col1, col2, col = st.columns([5, 4, 7])
         with col1:
             document()
         with col2:
