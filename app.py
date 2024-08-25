@@ -31,6 +31,8 @@ async def main():
     height = 700 if len(st.session_state.messages) > 1 else 640
     with st.container(height=height, border=False):
         display_chat_messages(st.session_state.messages)
+        if len(st.session_state.messages) == 1:
+            example_questions()
             
         st.session_state.search_results = None
         if st.session_state.messages[-1]["role"] != "assistant":
@@ -85,8 +87,6 @@ async def main():
                 feedback()
             followup_questions()
 
-    if len(st.session_state.messages) == 1:
-        example_questions()
     if st.session_state.chat_aborted:
         st.chat_input("Enter your search query here...", disabled=True)
     elif query := st.chat_input("Enter your search query here..."):

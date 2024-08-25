@@ -79,14 +79,13 @@ def followup_query_prompt(query):
 def vision_query_prompt(query, image_data):
     image_part = {
         "type": "image_url",
-        "image_url": f"{image_data}",
+        "image_url": { "url": f"{image_data}", "detail": "high"}
     }
     text_part = {"type": "text", "text": f"User query: {query}\n"}
     return (
         SystemMessage(
             content="""You are a WizSearch.AI an search expert that helps answering question,
-            utilize your fullest potential to provide information and assistance in your response.
-            """
+            utilize your fullest potential to provide information and assistance in your response."""
         ),
         HumanMessage(content=[text_part, image_part])
     ) 

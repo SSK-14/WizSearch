@@ -6,7 +6,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
 from src.modules.vectorstore import create_collection_and_insert
 from src.utils import clear_chat_history
-from src.modules.model import model_options, vision_models
 
 def display_chat_messages(messages):
     icons = {"assistant": "./src/assets/logo.png", "user": "👤"}
@@ -68,10 +67,10 @@ def example_questions():
         "What happened in T20 world cup 2024 final ?",
         "Write a short poem on a tool 'Wiz search'.",
     ]
-    if col1.button(questions[0]):
+    if col1.button(questions[0], use_container_width=True):
         st.session_state.messages.append({"role": "user", "content": questions[0]})
         st.rerun()
-    if col2.button(questions[1]):
+    if col2.button(questions[1], use_container_width=True):
         st.session_state.messages.append({"role": "user", "content": questions[1]})
         st.rerun()
 
@@ -126,16 +125,17 @@ def upload_image():
         st.rerun()
 
 def add_image():
-    if model_options[st.session_state.model_name] in vision_models:
-        if st.session_state.image_data:
-            if st.button("🔄 Change image", use_container_width=True):
-                st.session_state.image_data = None
-                st.rerun()
+    if "IS_VISION_MODEL" in st.secrets:
+        if st.secrets['IS_VISION_MODEL'] or False:
+            if st.session_state.image_data:
+                if st.button("🔄 Change image", use_container_width=True):
+                    st.session_state.image_data = None
+                    st.rerun()
+            else:
+                if st.button("🖼️ Add image", use_container_width=True):
+                    upload_image()
         else:
-            if st.button("🖼️ Add image", use_container_width=True):
-                upload_image()
-    else:
-        st.session_state.image_data = None
+            st.session_state.image_data = None
 
 def document():
     if not st.session_state.vectorstore:
