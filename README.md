@@ -3,21 +3,11 @@ Your intelligent ally for effortless data retrieval across documents and seamles
 
 https://github.com/user-attachments/assets/fa4fae96-6e78-474d-9d90-2e1d64833008
 
-## Ollama Quick Start Guides 🚀
-Connects to large language models via the Ollama server.
-- [Setup Ollama](./docs/OLLAMA.md)
-- [🔗 Demo](https://wizsearch-ollama.streamlit.app/)
-
-## Demos 🧩
-| Platform  | Demo Link | Code Link |
-|-----------|-----------|-----------|
-| **Replicate** 🔄 | [🔗 Demo](https://wizsearch.streamlit.app/) | [💻 Code](https://github.com/SSK-14/WizSearch/tree/replicate) |
-| **OpenAI** 🧠 | [🔗 Demo](https://wizsearch-openai.streamlit.app/) | [💻 Code](https://github.com/SSK-14/WizSearch/tree/openai) |
-
+#### [🔗 Demo](https://wizsearch-openai.streamlit.app/)
 
 ## How we built it 🛠️
 We built Wiz Search using the following components:
-- **LLM:** Open source models like llama3, mistral, LLaVA, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation.
+- **LLM:** Open source models like llama3, mistral, LLaVA, etc using [Ollama](https://ollama.ai/) for natural language understanding and generation. [ also supports openai, azure openai, groq ]
 - **Embeddings:** [BAAI/bge-small-en-v1.5](https://huggingface.co/BAAI/bge-small-en-v1.5) to enhance search relevance.
 - **Intelligent Search:** [Tavily](https://tavily.com/) for advanced search capabilities.
 - **Vector Databases:** [Qdrant](https://qdrant.tech/) for efficient data storage and retrieval.
