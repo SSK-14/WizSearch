@@ -38,8 +38,12 @@ async def search_tavily(query):
     retrieval.end(output=search_results)                
     if search_results["results"]:
         search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
+        image_urls = None
+        if "VISION_MODELS" in st.secrets:
+            if st.session_state.model_name in st.secrets['VISION_MODELS']:
+                image_urls = search_results["images"]
         st.json(search_results, expanded=False)
-        return search_rag_prompt(search_context, st.session_state.messages)
+        return search_rag_prompt(search_context, image_urls, st.session_state.messages)
     else:
         trace.update(output="No search results found", level="WARNING")
         abort_chat("I'm sorry, There was an error in search. Please try again.")

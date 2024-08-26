@@ -1,4 +1,7 @@
 import streamlit as st
+import base64, requests
+from io import BytesIO
+from PIL import Image
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant. Ask me anything you are looking for 🪄."}]
@@ -13,6 +16,16 @@ def abort_chat(error_message: str):
         st.session_state.messages[-1]["content"] = error_message
     st.session_state.chat_aborted = True
     st.rerun()
+
+def image_data(url):
+    try:
+        pil_image = Image.open(requests.get(url, stream=True).raw)
+        buffered = BytesIO()
+        pil_image.save(buffered, format="JPEG")
+        base64_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        return f"data:image/jpeg;base64,{base64_image}"
+    except Exception as e:
+        return None
 
 def initialise_session_state():
     if "chat_aborted" not in st.session_state:
@@ -31,5 +44,8 @@ def initialise_session_state():
         st.session_state.followup_query = []
 
     if "image_data" not in st.session_state:
-        st.session_state.image_data = None
+        st.session_state.image_data = []
+
+    if "model_api_key" not in st.session_state:
+        st.session_state.model_api_key = None
   

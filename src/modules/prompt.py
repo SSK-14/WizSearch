@@ -1,6 +1,8 @@
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 import json
+from src.utils import image_data
 
+ 
 def intent_prompt(user_query):
     return (
         SystemMessage(
@@ -28,6 +30,7 @@ def intent_prompt(user_query):
         )
     )
 
+
 def query_formatting_prompt(user_query):
     return (
         SystemMessage(
@@ -43,6 +46,7 @@ def query_formatting_prompt(user_query):
         )
     )
 
+
 def base_prompt(intent, query):
     return (
         SystemMessage(
@@ -56,7 +60,17 @@ def base_prompt(intent, query):
         )
     )
 
-def followup_query_prompt(query):    
+
+def followup_query_prompt(history=None):
+    query = history[-1]["content"]
+    chat_history = None
+    if len(history) > 2:
+        chat_history = "Previous user questions: "
+        chat_history += "\n".join([
+            f"{message['content']}" if message["role"] == "user" else ""
+            for message in history[:-1]
+        ])
+
     return (
         SystemMessage(
             content="""You are a WizSearch.AI an search expert that helps answering question. 
@@ -68,36 +82,33 @@ def followup_query_prompt(query):
             Response: ["What is the population of Paris?", "Place to visit in Paris?"]
             If User Query is not a proper question or no follow-up question can be generate then
             Response: []
-            """
+            Rules:
+            If not sure or no need for follow-up question then Response: []
+            Do not answer the question, only create follow-up questions.\n"""
         ),
         HumanMessage(
-            content=f"User query: {query}\n"
+            content=chat_history if chat_history else ""
+            f"Current User query: {query}\n"
             f"Response in ARRAY format:"
         ) 
     ) 
 
-def vision_query_prompt(query, image_data):
-    image_part = {
-        "type": "image_url",
-        "image_url": { "url": f"{image_data}", "detail": "high"}
-    }
-    text_part = {"type": "text", "text": f"User query: {query}\n"}
-    return (
-        SystemMessage(
-            content="""You are a WizSearch.AI an search expert that helps answering question,
-            utilize your fullest potential to provide information and assistance in your response."""
-        ),
-        HumanMessage(content=[text_part, image_part])
-    ) 
 
 def standalone_query_prompt(query=None, history=None):
+    chat_history = "\n".join([
+        f"User question: {message['content']}" if message["role"] == "user" else 
+        f"Assistant: {message['content'][:100]}..." if len(message["content"]) > 100 else 
+        f"Assistant: {message['content']}"
+        for message in history[1:]
+    ])
+
     return ( 
         SystemMessage(content=f"""Role: Standalone Question Creator.
             TASK: Create a standalone question based on the conversation that can be used to search.
             If the new question itself is a standalone question, then return the same question.                        
             Conversation History:
             ---------------------
-            {json.dumps(history)}
+            {chat_history}
             ---------------------
             RULES:
             1. Do not answer the question, only create a standalone question.
@@ -109,7 +120,13 @@ def standalone_query_prompt(query=None, history=None):
         ) 
     ) 
 
-def generate_prompt(history=None):
+
+def generate_prompt(query, history=None, image_data=None):
+    if image_data:
+        image_prompt = []
+        for image in image_data:
+            image_prompt.append({"type": "image_url", "image_url": {"url": image}})
+
     system_prompt = SystemMessage(content=f"""You are a WizSearch.AI an search expert that helps answering question, 
     utilize your fullest potential to provide information and assistance in your response.
 
@@ -121,27 +138,63 @@ def generate_prompt(history=None):
     prompt = [system_prompt]
     for dict_message in history:
         if dict_message["role"] == "user":
+            if dict_message == history[-1]:
+                if image_data:
+                    prompt.append(HumanMessage(content=[{"type": "text", "text": f"User query: {query}"}] + image_prompt))
+                else:
+                    prompt.append(HumanMessage(content=f"User query: {query}"))
+                break
             prompt.append(HumanMessage(content=dict_message["content"]))
         else:
             prompt.append(AIMessage(content=dict_message["content"]))
     return prompt
 
-def search_rag_prompt(search_results, history=None):
-    system_prompt = SystemMessage(content=f"""You are a WizSearch.AI an search expert that helps answering question, 
+
+def search_rag_prompt(search_results, image_urls, history=None):
+    image_prompt = []
+    image_instructions = None
+    if image_urls:
+        images = []
+        for image in image_urls:
+            base64_image = image_data(image)
+            if base64_image:
+                images.append(image)
+                image_prompt.append({"type": "image_url", "image_url": {"url": base64_image}})
+            if len(image_prompt) == 2:
+                break
+
+    if len(images):    
+        image_instructions = f"{'Images:'+json.dumps(images)}\n Add only necessary images in the response only if needed.\n Focus on the user query and search information."
+
+    system_base_prompt = f"""You are a WizSearch.AI an search expert that helps answering question, 
     utilize the search information to their fullest potential to provide additional information and assistance in your response.
-    SEARCH INFORMATION is below:
-    ---------------------
-    {search_results}
-    ---------------------
+
     RULES:
     1. Only Answer the USER QUESTION using the INFORMATION.
     2. Include source link/info in the answer.
-    3. Respond in markdown format.""")
+    3. Respond in markdown format."""
+
+    user_prompt = f"""SEARCH INFORMATION is below:
+    ---------------------
+    {search_results}
+    ---------------------
+    {image_instructions if image_instructions else ""}
+    User query: {history[-1]["content"]}"""
+
+    system_prompt = SystemMessage(content=system_base_prompt)
     
     prompt = [system_prompt]
     for dict_message in history:
         if dict_message["role"] == "user":
+            if dict_message == history[-1]:
+                if len(image_prompt) > 0:
+                    prompt.append(HumanMessage(content=[{"type": "text", "text": user_prompt}] + image_prompt))
+                else:
+                    prompt.append(HumanMessage(content=user_prompt))
+                break
             prompt.append(HumanMessage(content=dict_message["content"]))
         else:
             prompt.append(AIMessage(content=dict_message["content"]))
+
+    
     return prompt

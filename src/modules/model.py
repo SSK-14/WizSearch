@@ -6,27 +6,30 @@ if "IS_AZURE" in st.secrets:
 else:
     is_azure = False
 
-if "MODEL_NAME" in st.secrets:
-    model_name = st.secrets["MODEL_NAME"]
-else:
-    st.warning('Please provide Model name in secrets.', icon="⚠️")
-    st.stop()
-
 if "MODEL_BASE_URL" in st.secrets:
     model_base_url = st.secrets['MODEL_BASE_URL']
 else:
     st.warning('Please provide Model server URL in secrets.', icon="⚠️")
     st.stop()
 
-if "MODEL_API_KEY" in st.secrets:
-    model_api_key = st.secrets['MODEL_API_KEY']
+if "MODEL_NAMES" not in st.secrets:
+    st.warning('Please provide Model name in secrets.', icon="⚠️")
+    st.stop()
+
 
 def initialise_model():
     if "llm" not in st.session_state:
         st.session_state.llm = None
+    if "MODEL_API_KEY" in st.secrets:
+        model_api_key = st.secrets['MODEL_API_KEY']
+    elif st.session_state.model_api_key:
+        model_api_key = st.session_state.model_api_key
+    else:
+        st.warning('Please provide Model API key in sidebar.', icon="⚠️")
+        st.stop()
     if is_azure:
         st.session_state.llm = AzureChatOpenAI(
-            model=model_name,
+            model=st.session_state.model_name,
             api_version = "2024-02-01",
             temperature=st.session_state.temperature or 0.1,
             max_tokens=st.session_state.max_tokens or 2500,
@@ -35,7 +38,7 @@ def initialise_model():
         )
     else:
         st.session_state.llm = ChatOpenAI(
-            model=model_name,
+            model=st.session_state.model_name,
             temperature=st.session_state.temperature or 0.1,
             max_tokens=st.session_state.max_tokens or 2500,
             base_url=model_base_url,
@@ -45,7 +48,7 @@ def initialise_model():
 async def llm_generate(prompt, trace, name="llm-generate"):
     generation = trace.generation(
         name=name,
-        model=model_name,
+        model=st.session_state.model_name,
         input=prompt,
     )
     result = st.session_state.llm.invoke(prompt).content
@@ -55,7 +58,7 @@ async def llm_generate(prompt, trace, name="llm-generate"):
 def llm_stream(prompt, trace, name="llm-stream"):
     generation = trace.generation(
         name=name,
-        model=model_name,
+        model=st.session_state.model_name,
         input=prompt,
     )
     st.session_state.messages.append({"role": "assistant", "content": ""})

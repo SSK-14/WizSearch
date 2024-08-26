@@ -75,7 +75,7 @@ def example_questions():
         st.rerun()
 
 
-@st.experimental_dialog("Upload your documents")
+@st.dialog("Upload your documents")
 def upload_document():
     uploaded_files = st.file_uploader(
         "Upload PDF files", 
@@ -113,29 +113,30 @@ def upload_document():
             st.session_state.vectorstore = True
             st.rerun()
 
-@st.experimental_dialog("Add Image to Chat")
+@st.dialog("Add Image to Chat")
 def upload_image():
-    uploaded_image = st.file_uploader("Upload Image", type=['png', 'jpg'])
-    if uploaded_image:
-        bytes_data = uploaded_image.getvalue()
-        base64_image = base64.b64encode(bytes_data).decode('utf-8')
-        image_format = uploaded_image.type.split('/')[-1]
-        image_data = f"data:image/{image_format};base64,{base64_image}"
-        st.session_state.image_data = image_data
+    uploaded_images = st.file_uploader("Upload Image", type=['png', 'jpg'], accept_multiple_files=True)
+    if uploaded_images:
+        for uploaded_image in uploaded_images:
+            bytes_data = uploaded_image.getvalue()
+            base64_image = base64.b64encode(bytes_data).decode('utf-8')
+            image_format = uploaded_image.type.split('/')[-1]
+            image_data = f"data:image/{image_format};base64,{base64_image}"
+            st.session_state.image_data.append(image_data)
         st.rerun()
 
 def add_image():
-    if "IS_VISION_MODEL" in st.secrets:
-        if st.secrets['IS_VISION_MODEL'] or False:
-            if st.session_state.image_data:
+    if "VISION_MODELS" in st.secrets:
+        if st.session_state.model_name in st.secrets['VISION_MODELS']:
+            if len(st.session_state.image_data):
                 if st.button("🔄 Change image", use_container_width=True):
-                    st.session_state.image_data = None
+                    st.session_state.image_data = []
                     st.rerun()
             else:
                 if st.button("🖼️ Add image", use_container_width=True):
                     upload_image()
         else:
-            st.session_state.image_data = None
+            st.session_state.image_data = []
 
 def document():
     if not st.session_state.vectorstore:

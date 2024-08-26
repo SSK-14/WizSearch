@@ -3,11 +3,26 @@ import streamlit as st
 def side_info():
     with st.sidebar:
         st.logo("src/assets/title.png", icon_image="src/assets/title.png", link="https://github.com/SSK-14")
-        st.components.v1.html("", height=20, scrolling=False)
         st.image("src/assets/logo.png", use_column_width=True)
         st.image("src/assets/header.png", use_column_width=True)
-        st.components.v1.html("", height=20, scrolling=False)
-        
+
+        if "MODEL_NAMES" in st.secrets:
+            st.selectbox(
+                "Model Name",
+                options=st.secrets["MODEL_NAMES"],
+                index=0,
+                key="model_name"
+            )
+
+        if "MODEL_API_KEY" not in st.secrets:
+            st.text_input(
+                "Model API Key",
+                type="password",
+                placeholder="Paste your model key here",
+                help="You can get your API key from [openai](https://platform.openai.com/account/api-keys)",
+                key="model_api_key"
+            )
+
         if "TAVILY_API_KEY" not in st.secrets:
             st.text_input(
                 "Tavily API Key",
