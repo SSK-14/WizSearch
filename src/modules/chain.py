@@ -22,7 +22,7 @@ async def search_vectorstore(query):
     trace = st.session_state.trace
     st.write("📚 Searching the document...")
     retrieval = trace.span(name="Retrieval", metadata={"search": "document"}, input=query)
-    search_results = search_collection(query)
+    search_results = search_collection(st.session_state.collection_name, query, st.session_state.top_k)
     st.session_state.search_results = search_results
     retrieval.end(output=search_results)
     if search_results:

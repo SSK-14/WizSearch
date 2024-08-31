@@ -33,6 +33,9 @@ def side_info():
             )
 
         with st.popover("More settings", use_container_width=True):
+            if "collection_name" in st.session_state:
+                st.slider("Top K results", min_value=1, max_value=10, value=4, key="top_k")
+
             st.slider(
                 "Temperature", min_value=0.0, max_value=2.0, step=0.1, value=0.1, key="temperature"
             )

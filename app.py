@@ -8,7 +8,6 @@ from src.components.ui import display_search_result, display_chat_messages, feed
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import process_query, search_tavily , search_vectorstore
 
-
 os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
 os.environ["LANGFUSE_PUBLIC_KEY"] = st.secrets["LANGFUSE_PUBLIC_KEY"]
 os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" 
