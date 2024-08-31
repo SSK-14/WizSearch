@@ -4,7 +4,7 @@ import PyPDF2
 import base64
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
-from src.modules.vectorstore import create_collection_and_insert
+from src.modules.tools.vectorstore import create_collection_and_insert
 from src.utils import clear_chat_history
 
 def display_chat_messages(messages):
@@ -32,21 +32,22 @@ def display_search_result(search_results):
 
 def feedback():
     trace = st.session_state.trace
-    scores = {"😀": 1, "🙂": 0.75, "😐": 0.5, "🙁": 0.25, "😞": 0}
-    if "feedback_" + trace.id not in st.session_state: 
-        streamlit_feedback(
-            feedback_type="faces",
-            optional_text_label="[Optional] Please provide an explanation",
-            key=f"feedback_{trace.id}",
-        )
-    else:
-        if st.session_state["feedback_" + trace.id] is not None:
-            feedback = st.session_state["feedback_" + trace.id]
-            trace.score(
-                name="user-explicit-feedback",
-                value=scores[feedback["score"]],
-                comment=feedback["text"],
+    if trace:
+        scores = {"😀": 1, "🙂": 0.75, "😐": 0.5, "🙁": 0.25, "😞": 0}
+        if "feedback_" + trace.id not in st.session_state: 
+            streamlit_feedback(
+                feedback_type="faces",
+                optional_text_label="[Optional] Please provide an explanation",
+                key=f"feedback_{trace.id}",
             )
+        else:
+            if st.session_state["feedback_" + trace.id] is not None:
+                feedback = st.session_state["feedback_" + trace.id]
+                trace.score(
+                    name="user-explicit-feedback",
+                    value=scores[feedback["score"]],
+                    comment=feedback["text"],
+                )
 
 def followup_questions():
     if st.session_state.followup_query and len(st.session_state.followup_query) > 0:

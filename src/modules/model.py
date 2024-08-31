@@ -45,25 +45,31 @@ def initialise_model():
             api_key=model_api_key
         )
 
-async def llm_generate(prompt, trace, name="llm-generate"):
-    generation = trace.generation(
-        name=name,
-        model=st.session_state.model_name,
-        input=prompt,
-    )
+async def llm_generate(prompt, name="llm-generate"):
+    trace = st.session_state.trace
+    if trace:
+        generation = trace.generation(
+            name=name,
+            model=st.session_state.model_name,
+            input=prompt,
+        )
     result = st.session_state.llm.invoke(prompt).content
-    generation.end(output=result)
+    if trace:
+        generation.end(output=result)
     return result
 
-def llm_stream(prompt, trace, name="llm-stream"):
-    generation = trace.generation(
-        name=name,
-        model=st.session_state.model_name,
-        input=prompt,
-    )
+def llm_stream(prompt, name="llm-stream"):
+    trace = st.session_state.trace
+    if trace:
+        generation = trace.generation(
+            name=name,
+            model=st.session_state.model_name,
+            input=prompt,
+        )
     st.session_state.messages.append({"role": "assistant", "content": ""})
     for chunk in st.session_state.llm.stream(prompt):
         st.session_state.messages[-1]["content"] += str(chunk.content)
         yield str(chunk.content)
-    generation.end(output=st.session_state.messages[-1]["content"])
+    if trace:
+        generation.end(output=st.session_state.messages[-1]["content"])
 

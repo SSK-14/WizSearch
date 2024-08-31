@@ -87,7 +87,7 @@ def followup_query_prompt(history=None):
             Do not answer the question, only create follow-up questions.\n"""
         ),
         HumanMessage(
-            content=chat_history if chat_history else ""
+            content=f"{chat_history if chat_history else ''}\n"
             f"Current User query: {query}\n"
             f"Response in ARRAY format:"
         ) 
@@ -150,11 +150,11 @@ def generate_prompt(query, history=None, image_data=None):
     return prompt
 
 
-def search_rag_prompt(search_results, image_urls, history=None):
+def search_rag_prompt(search_results, image_urls=[], history=None):
     image_prompt = []
     image_instructions = None
-    if image_urls:
-        images = []
+    images = []
+    if image_urls and len(image_urls):
         for image in image_urls:
             base64_image = image_data(image)
             if base64_image:
