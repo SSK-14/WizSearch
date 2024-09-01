@@ -6,20 +6,19 @@ if "IS_AZURE" in st.secrets:
 else:
     is_azure = False
 
-if "MODEL_BASE_URL" in st.secrets:
-    model_base_url = st.secrets['MODEL_BASE_URL']
-else:
-    st.warning('Please provide Model server URL in secrets.', icon="⚠️")
-    st.stop()
-
-if "MODEL_NAMES" not in st.secrets:
-    st.warning('Please provide Model name in secrets.', icon="⚠️")
-    st.stop()
-
 
 def initialise_model():
     if "llm" not in st.session_state:
         st.session_state.llm = None
+
+    if "MODEL_BASE_URL" in st.secrets:
+        model_base_url = st.secrets['MODEL_BASE_URL']
+    elif st.session_state.model_base_url:
+        model_base_url = st.session_state.model_base_url
+    else:
+        st.warning('Please provide Model Base URL in sidebar.', icon="⚠️")
+        st.stop()
+    
     if "MODEL_API_KEY" in st.secrets:
         model_api_key = st.secrets['MODEL_API_KEY']
     elif st.session_state.model_api_key:
@@ -27,6 +26,11 @@ def initialise_model():
     else:
         st.warning('Please provide Model API key in sidebar.', icon="⚠️")
         st.stop()
+
+    if st.session_state.model_name is None or st.session_state.model_name == "":
+        st.warning('Please provide Model Name in sidebar.', icon="⚠️")
+        st.stop()
+    
     if is_azure:
         st.session_state.llm = AzureChatOpenAI(
             model=st.session_state.model_name,

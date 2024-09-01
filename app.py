@@ -65,7 +65,7 @@ async def main():
         st.rerun()
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Wiz AI", page_icon="🌟")
+    st.set_page_config(page_title="Wiz AI", page_icon="✨")
     st.title("🔍 :orange[AI] Playground")
     side_info()
     initialise_session_state()

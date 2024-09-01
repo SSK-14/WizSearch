@@ -29,21 +29,27 @@ def side_info():
         st.image("src/assets/logo.png", use_column_width=True)
         st.image("src/assets/header.png", use_column_width=True)
 
+        if "MODEL_BASE_URL" not in st.secrets:
+            st.text_input("Model Base URL", key="model_base_url", value="https://api.groq.com/openai/v1", placeholder="Eg : https://api.openai.com/v1")
+
+        if "MODEL_API_KEY" not in st.secrets:
+            st.text_input(
+                "Model API Key",
+                type="password",
+                placeholder="Enter your API key here",
+                help="Get your API key from [openai](https://platform.openai.com/account/api-keys) or [groq](https://console.groq.com/keys)",
+                key="model_api_key"
+            )
+
+        if "MODEL_NAMES" not in st.secrets:
+            st.text_input("Model ID", key="model_name", value="llama-3.1-8b-instant", placeholder="Eg : gpt-4o, llama3.1")
+
         if "MODEL_NAMES" in st.secrets:
             st.selectbox(
                 "Select Model",
                 options=st.secrets["MODEL_NAMES"],
                 index=0,
                 key="model_name"
-            )
-
-        if "MODEL_API_KEY" not in st.secrets:
-            st.text_input(
-                "Model API Key",
-                type="password",
-                placeholder="Paste your model key here",
-                help="You can get your API key from [openai](https://platform.openai.com/account/api-keys)",
-                key="model_api_key"
             )
 
         if "TAVILY_API_KEY" not in st.secrets:
