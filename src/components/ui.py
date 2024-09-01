@@ -1,10 +1,8 @@
-import secrets
 import streamlit as st
-import PyPDF2
-import base64
+import PyPDF2, base64
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from streamlit_feedback import streamlit_feedback
-from src.modules.tools.vectorstore import create_collection_and_insert
+from src.modules.tools.vectorstore import create_collection_and_insert, all_collections
 from src.utils import clear_chat_history
 
 def display_chat_messages(messages):
@@ -28,7 +26,6 @@ def display_search_result(search_results):
             if search_results["results"]:
                 for result in search_results["results"]:
                     st.write(f"- [{result['title']}]({result['url']})")
-
 
 def feedback():
     trace = st.session_state.trace
@@ -81,41 +78,57 @@ def example_questions():
 
 @st.dialog("Upload your documents")
 def upload_document():
-    uploaded_files = st.file_uploader(
-        "Upload PDF files", 
-        accept_multiple_files=True, 
-        type="pdf"
-    )
+    collections = all_collections()
+    col1, col2 = st.columns(2)
 
-    if uploaded_files:
-        with st.expander("Chunk Settings", expanded=True):
-            col1, col2 = st.columns(2)
-            col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
-            col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
+    collection_name = col1.selectbox("Select a document", collections, index=None)
+    if collection_name:
+        st.session_state.collection_name = collection_name
+        st.session_state.vectorstore = True
+        st.rerun()
 
-        _col1, col, _col2 = st.columns([1, 2, 1])
-        if col.button("Submit", use_container_width=True, type="primary"):
-            text = []
-            metadatas = []
-            st.session_state.collection_name = secrets.token_urlsafe(8)
-            for file in uploaded_files:
-                pdf_reader = PyPDF2.PdfReader(file)
-                page_number = 1
-                for page in pdf_reader.pages:
-                    text.append(page.extract_text())
-                    metadatas.append({"page": page_number, "file": file.name})
-                    page_number += 1
+    new_collection = col2.text_input("Upload a new document", placeholder="Enter new document name")
+    if new_collection in collections:
+        st.error("Collection already exists. Please choose a different name.")
+    if new_collection.strip() != "" and new_collection not in collections:
+        uploaded_files = st.file_uploader(
+            "Upload PDF files", 
+            accept_multiple_files=True, 
+            type="pdf"
+        )
 
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=st.session_state.get("chunk_size") or 500,
-                chunk_overlap=st.session_state.get("chunk_overlap") or 80,
-                separators=["\n\n", "\n", " ", ""],
-            )
+        if uploaded_files:
+            with st.expander("Chunk Settings", expanded=False):
+                col1, col2 = st.columns(2)
+                col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
+                col2.slider("Chunk Overlap", min_value=0, max_value=500, value=100, key="chunk_overlap")
 
-            chunks = text_splitter.create_documents(text, metadatas=metadatas)
-            create_collection_and_insert(st.session_state.collection_name, chunks)
-            st.session_state.vectorstore = True
-            st.rerun()
+            _, col, _ = st.columns([1, 2, 1])
+            if col.button("Submit", use_container_width=True, type="primary"):
+                text = []
+                metadatas = []
+                st.session_state.collection_name = new_collection
+                for file in uploaded_files:
+                    pdf_reader = PyPDF2.PdfReader(file)
+                    page_number = 1
+                    for page in pdf_reader.pages:
+                        text.append(page.extract_text())
+                        metadatas.append({"page": page_number, "file": file.name})
+                        page_number += 1
+
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=st.session_state.get("chunk_size") or 500,
+                    chunk_overlap=st.session_state.get("chunk_overlap") or 80,
+                    separators=["\n\n", "\n", " ", ""],
+                )
+
+                chunks = text_splitter.create_documents(text, metadatas=metadatas)
+                _, col, _ = st.columns([1, 4, 1])
+                with col:
+                    with st.spinner("Please wait, inserting documents ⌛..."):
+                        create_collection_and_insert(st.session_state.collection_name, chunks)
+                st.session_state.vectorstore = True
+                st.rerun()
 
 @st.dialog("Add Image to Chat")
 def upload_image():

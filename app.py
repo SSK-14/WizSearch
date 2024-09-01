@@ -10,7 +10,7 @@ from src.modules.tools.langfuse import start_trace, end_trace
 @st.fragment
 async def main():
     if len(st.session_state.messages) == 1:
-        col1, col2, col = st.columns([5, 4, 7])
+        col1, col2, col = st.columns([4, 4, 6])
         with col1:
             document()
         with col2:

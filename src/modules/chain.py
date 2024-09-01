@@ -48,12 +48,11 @@ async def search_tavily(query):
         if "VISION_MODELS" in st.secrets:
             if st.session_state.model_name in st.secrets['VISION_MODELS']:
                 image_urls = search_results["images"]
-        return search_rag_prompt(search_context, image_urls, st.session_state.messages)
+        return search_rag_prompt(search_context, st.session_state.messages, image_urls)
     else:
         if trace:
             end_trace("No search results found", "WARNING")
         abort_chat("I'm sorry, There was an error in search. Please try again.")
-
 
 async def generate_answer_prompt():
     with st.status("🚀 AI at work...", expanded=True) as status:

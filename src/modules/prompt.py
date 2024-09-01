@@ -193,7 +193,7 @@ def generate_prompt(query, history=None, image_data=None):
     return prompt
 
 
-def search_rag_prompt(search_results, image_urls=[], history=None):
+def search_rag_prompt(search_results,  history=None, image_urls=[]):
     image_prompt = []
     image_instructions = None
     images = []
