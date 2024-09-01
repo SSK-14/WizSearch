@@ -61,15 +61,21 @@ def followup_questions():
 
 def example_questions():
     col1, col2 = st.columns(2)
-    questions = [
-        "What happened in T20 world cup 2024 final ?",
-        "Write a short poem on a tool 'Wiz search'.",
-    ]
+    if st.session_state.vectorstore:
+        questions = [
+            "Provide a TL;DR summary of the document. 📄",
+            "Highlight the key points of the document. 🔑",
+        ]
+    else:
+        questions = [
+            "What happened in T20 world cup 2024 final ?",
+            "Write a short poem on a tool 'Wiz search'.",
+        ]
     if col1.button(questions[0], use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": questions[0]})
+        st.session_state.messages.append({"role": "user", "content": questions[0], "summary": st.session_state.vectorstore})
         st.rerun()
     if col2.button(questions[1], use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": questions[1]})
+        st.session_state.messages.append({"role": "user", "content": questions[1], "summary": st.session_state.vectorstore})
         st.rerun()
 
 

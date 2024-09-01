@@ -47,6 +47,49 @@ def query_formatting_prompt(user_query):
     )
 
 
+def key_points_prompt(text):
+    return (
+        SystemMessage(
+            content=f"""Role: You are a extractive summarization expert.\n
+            Goal: Identifies key sentences within the document using technique TF-IDF.
+            Do not mention about the technique used.\n
+            Instructions: 
+            1. Make sure you include most important points only.
+            2. Must Only include max 5 points. Keep it short and concise.
+            3. Do not include any examples, links, repeated content. 
+            4. Use the exact same words/sentences.
+            5. Only return the key points. No explanation needed.\n"""
+        ),
+        HumanMessage(
+            content=f"""Given document content: 
+            ---------------------
+            {text}
+            ---------------------
+            Only Key Points:"""
+        )
+    )
+
+def summary_prompt(query, text):
+    return (
+        SystemMessage(
+            content=f"""Role: You are a extractive summarization expert.\n
+            Goal: Only use the documents content below to answer the user question.\n
+            Instructions: 
+            1. Make sure you include most important points.
+            2. Use the exact same words/sentences. Do not hallucinate.
+            3. Keep it short and concise.
+            Documents content:
+            ---------------------
+            {text}
+            ---------------------
+            """
+        ),
+        HumanMessage(
+            content=f"""User query: {query}\n 
+            Answer:"""
+        )
+    )
+
 def base_prompt(intent, query):
     return (
         SystemMessage(

@@ -1,11 +1,10 @@
 import asyncio, json 
 import streamlit as st
 from src.components.sidebar import side_info
-from src.modules.model import llm_generate, llm_stream, initialise_model
-from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt
+from src.modules.model import llm_stream, initialise_model
 from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
-from src.modules.chain import process_query, search_tavily , search_vectorstore
+from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
 
 @st.fragment
@@ -27,25 +26,11 @@ async def main():
         start_trace(query)
 
         try:
-            with st.status("🚀 AI at work...", expanded=True) as status:
-                query, intent = await process_query()
-                followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(st.session_state.messages), "Follow-up Query"))
-                    
-                if len(st.session_state.image_data):
-                    prompt = generate_prompt(query, st.session_state.messages, st.session_state.image_data)
-                elif "search" in intent:
-                    query = await llm_generate(query_formatting_prompt(query), "Query Formatting")
-                    st.write(f"📝 Search query: {query}")
-                    if st.session_state.vectorstore:
-                        prompt = await search_vectorstore(query)
-                    else:
-                        prompt = await search_tavily(query)
-                elif "generate" in intent:
-                    st.write("🔮 Generating response...")
-                    prompt = generate_prompt(query, st.session_state.messages)
-                else:
-                    prompt = base_prompt(intent, query)
-                status.update(label="Done and dusted!", state="complete", expanded=False)
+            if "summary" in st.session_state.messages[-1] and st.session_state.messages[-1]["summary"]:
+                prompt = await generate_summary_prompt()
+                followup_query_asyncio = None
+            else:
+                prompt, followup_query_asyncio = await generate_answer_prompt()
         except Exception as e:
             end_trace(str(e), "ERROR")
             abort_chat(f"An error occurred: {e}")
@@ -62,7 +47,7 @@ async def main():
                 except json.JSONDecodeError:
                     st.session_state.followup_query = []
 
-        with st.chat_message("assistant", avatar="./src/assets/logo.png"):
+        with st.chat_message("assistant", avatar="✨"):
             st.write_stream(llm_stream(prompt, "Final Answer"))
         end_trace(st.session_state.messages[-1]["content"])
 

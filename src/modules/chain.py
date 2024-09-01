@@ -1,10 +1,12 @@
+import asyncio
 import streamlit as st
 from src.modules.model import llm_generate
-from src.modules.tools.vectorstore import search_collection
+from src.modules.tools.vectorstore import search_collection, all_points
 from src.modules.prompt import intent_prompt, search_rag_prompt, standalone_query_prompt
 from src.utils import abort_chat
 from src.modules.tools.search import initialise_tavily
 from src.modules.tools.langfuse import end_trace
+from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt, key_points_prompt, summary_prompt
 
 async def process_query():
     query = st.session_state.messages[-1]["content"]
@@ -51,3 +53,37 @@ async def search_tavily(query):
         if trace:
             end_trace("No search results found", "WARNING")
         abort_chat("I'm sorry, There was an error in search. Please try again.")
+
+
+async def generate_answer_prompt():
+    with st.status("🚀 AI at work...", expanded=True) as status:
+        query, intent = await process_query()
+        followup_query_asyncio = asyncio.create_task(llm_generate(followup_query_prompt(st.session_state.messages), "Follow-up Query"))
+                    
+        if len(st.session_state.image_data):
+            prompt = generate_prompt(query, st.session_state.messages, st.session_state.image_data)
+        elif "search" in intent:
+            query = await llm_generate(query_formatting_prompt(query), "Query Formatting")
+            st.write(f"📝 Search query: {query}")
+            if st.session_state.vectorstore:
+                prompt = await search_vectorstore(query)
+            else:
+                prompt = await search_tavily(query)
+        elif "generate" in intent:
+            st.write("🔮 Generating response...")
+            prompt = generate_prompt(query, st.session_state.messages)
+        else:
+            prompt = base_prompt(intent, query)
+        status.update(label="Done and dusted!", state="complete", expanded=False)
+    return prompt, followup_query_asyncio
+
+async def generate_summary_prompt():
+    with st.status("📝 Reading through the document...", expanded=False) as status:
+        st.toast("Process may take a while, please wait...", "⏳")
+        query = st.session_state.messages[-1]["content"]
+        all_texts = all_points(st.session_state.collection_name)
+        tasks = [llm_generate(key_points_prompt(text), "Key Points") for text in all_texts]
+        key_points = await asyncio.gather(*tasks)
+        status.update(label="Done and dusted!", state="complete", expanded=False)
+    key_points = "\n".join([f"{point}" for point in key_points])
+    return summary_prompt(query, key_points)

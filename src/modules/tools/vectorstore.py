@@ -72,3 +72,15 @@ def search_collection(collection_name, query, top_k=4):
 
     return [{"text": item.payload.get("text"), "metadata": item.payload.get("metadata")}  for item in search_results.points]
 
+def all_points(collection_name):
+    result = qdrant_client.count(collection_name=collection_name)
+    records = qdrant_client.scroll(
+        collection_name=collection_name,
+        limit=result.count,
+        with_payload=True,
+    )
+    joined_text = " ".join(record.payload['text'] for record in records[0])
+    cleaned_text = joined_text.replace("\t", " ").replace("\n", " ").replace("\r", " ")
+    # create a array of text by chunking cleaned_text by 5000 characters
+    texts = [cleaned_text[i:i+5000] for i in range(0, len(cleaned_text), 5000)]
+    return texts
