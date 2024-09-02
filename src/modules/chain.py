@@ -38,7 +38,7 @@ async def search_tavily(query):
     st.write("🌐 Searching the web...")
     if trace:
         retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)
-    search_results = tavily.search(query, search_depth="advanced", include_images=True)
+    search_results = tavily.search(query, search_depth="advanced", include_images=st.session_state.image_search, max_results=st.session_state.top_search_results)
     st.session_state.search_results = search_results
     if trace:
         retrieval.end(output=search_results)                
@@ -78,7 +78,7 @@ async def generate_answer_prompt():
 
 async def generate_summary_prompt():
     with st.status("📝 Reading through the document...", expanded=False) as status:
-        st.toast("Process may take a while, please wait...", "⏳")
+        st.toast("Process may take a while, please wait...", icon="⏳")
         query = st.session_state.messages[-1]["content"]
         all_texts = all_points(st.session_state.collection_name)
         tasks = [llm_generate(key_points_prompt(text), "Key Points") for text in all_texts]

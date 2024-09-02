@@ -3,13 +3,17 @@ from src.modules.tools.vectorstore import all_collections, delete_collection
 
 @st.dialog("Wiz Settings")
 def system_settings():
-    if "vectorstore" in st.session_state and st.session_state.vectorstore:
-        st.slider("Top K results", min_value=1, max_value=10, value=4, key="top_k")
+    st.subheader("Model Settings")
     col1, col2 = st.columns(2)
     col1.slider("Temperature", min_value=0.0, max_value=2.0, step=0.1, value=0.1, key="temperature")
     col2.slider("Max Tokens", min_value=0, max_value=8000, value=2500, key="max_tokens")
+    st.subheader("Search Settings")
+    st.checkbox("Use image search", key="image_search", value=True)
+    st.slider("Top Search Results", min_value=1, max_value=10, value=4, key="top_search_results")
+    st.subheader("Documents Settings")
     collections = all_collections()
-    st.subheader("Manage Documents")
+    if "vectorstore" in st.session_state and st.session_state.vectorstore:
+        st.slider("Top K results", min_value=1, max_value=10, value=4, key="top_k")
     if len(collections):
         col1, col2, col3 = st.columns([4, 1, 1])
         collection_name = col1.selectbox("Select a document", collections, index=0, label_visibility="collapsed")

@@ -125,7 +125,7 @@ def upload_document():
                 chunks = text_splitter.create_documents(text, metadatas=metadatas)
                 _, col, _ = st.columns([1, 4, 1])
                 with col:
-                    with st.spinner("Please wait, inserting documents ⌛..."):
+                    with st.spinner("Please wait, ingesting documents ⌛..."):
                         create_collection_and_insert(st.session_state.collection_name, chunks)
                 st.session_state.vectorstore = True
                 st.rerun()

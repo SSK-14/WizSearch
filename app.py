@@ -1,4 +1,4 @@
-import asyncio, json 
+import asyncio, json, os
 import streamlit as st
 from src.components.sidebar import side_info
 from src.modules.model import llm_stream, initialise_model
@@ -6,6 +6,8 @@ from src.components.ui import display_search_result, display_chat_messages, feed
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 @st.fragment
 async def main():

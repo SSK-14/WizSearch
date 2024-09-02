@@ -43,6 +43,12 @@ def initialise_session_state():
     if "max_tokens" not in st.session_state:
         st.session_state.max_tokens = 2500
 
+    if "image_search" not in st.session_state:
+        st.session_state.image_search = True
+
+    if "top_search_results" not in st.session_state:
+        st.session_state.top_search_results = 4
+
     if "search_results" not in st.session_state:
         st.session_state.search_results = None
 
