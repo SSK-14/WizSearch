@@ -6,7 +6,6 @@ if "IS_AZURE" in st.secrets:
 else:
     is_azure = False
 
-
 def initialise_model():
     if "llm" not in st.session_state:
         st.session_state.llm = None

@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 from tavily import TavilyClient
 
 def initialise_tavily():
@@ -11,3 +12,7 @@ def initialise_tavily():
         st.stop()
 
     return TavilyClient(api_key=tavily_api_key)
+
+def jina_reader(url):
+    response = requests.get("https://r.jina.ai/"+url)
+    return response.text

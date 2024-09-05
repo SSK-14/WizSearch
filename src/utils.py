@@ -45,9 +45,9 @@ def initialise_session_state():
 
     if "image_search" not in st.session_state:
         st.session_state.image_search = True
-
-    if "top_search_results" not in st.session_state:
-        st.session_state.top_search_results = 4
+        
+    if "top_k" not in st.session_state:
+        st.session_state.top_k = 4
 
     if "search_results" not in st.session_state:
         st.session_state.search_results = None
@@ -57,6 +57,9 @@ def initialise_session_state():
 
     if "image_data" not in st.session_state:
         st.session_state.image_data = []
+
+    if "knowledge_in_memory" not in st.session_state:
+        st.session_state.knowledge_in_memory = False
 
     if "model_api_key" not in st.session_state:
         st.session_state.model_api_key = None

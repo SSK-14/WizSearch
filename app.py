@@ -2,7 +2,7 @@ import asyncio, json, os
 import streamlit as st
 from src.components.sidebar import side_info
 from src.modules.model import llm_stream, initialise_model
-from src.components.ui import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image
+from src.components.chat import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
@@ -11,6 +11,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 @st.fragment
 async def main():
+    side_info()
+    initialise_model()
+    
     if len(st.session_state.messages) == 1:
         col1, col2, col = st.columns([4, 4, 6])
         with col1:
@@ -69,7 +72,5 @@ async def main():
 if __name__ == "__main__":
     st.set_page_config(page_title="Wiz AI", page_icon="✨")
     st.title("🔍 :orange[AI] Playground")
-    side_info()
     initialise_session_state()
-    initialise_model()
     asyncio.run(main())

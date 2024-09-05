@@ -20,17 +20,20 @@ if "QDRANT_URL" in st.secrets:
 else:
     qdrant_client = QdrantClient(":memory:")
 
+qdrant_client_memory = QdrantClient(":memory:")
+
 embedding_model = TextEmbedding(
     model_name="jinaai/jina-embeddings-v2-base-en", 
     providers=["CPUExecutionProvider"]
 )
+
 sparse_embedding_model = SparseTextEmbedding(
     model_name="Qdrant/bm25",
     providers=["CPUExecutionProvider"]
 )
 
-def create_collection(collection):
-    qdrant_client.create_collection(
+def create_collection(client, collection):
+    client.create_collection(
         collection,
         vectors_config={
             "text-dense": models.VectorParams(
@@ -45,14 +48,18 @@ def create_collection(collection):
         }
     )
 
-def create_collection_and_insert(collection_name, documents):
-    create_collection(collection_name)
+def create_collection_and_insert(collection_name, documents, is_memory=False):
+    if is_memory:
+        client = qdrant_client_memory
+    else:
+        client = qdrant_client
+    create_collection(client, collection_name)
     point_id = 1
     for doc in documents:
         text = doc.page_content
         dense_embedding = list(embedding_model.query_embed(text))[0]
         sparse_embedding = list(sparse_embedding_model.query_embed(text))[0]
-        qdrant_client.upsert(
+        client.upsert(
             collection_name=collection_name,
             points=[
                 models.PointStruct(
@@ -73,10 +80,15 @@ def create_collection_and_insert(collection_name, documents):
         )
         point_id += 1
 
-def search_collection(collection_name, query, top_k=4):
+def search_collection(collection_name, query, top_k=4, is_memory=False):
+    if is_memory:
+        client = qdrant_client_memory
+    else:
+        client = qdrant_client
+
     dense_embedding = list(embedding_model.query_embed(query))[0]
     sparse_embedding = list(sparse_embedding_model.query_embed(query))[0]
-    search_results = qdrant_client.query_points(
+    search_results = client.query_points(
         collection_name=collection_name,
         prefetch=[
             models.Prefetch(query=sparse_embedding.as_object(), using="text-sparse", limit=top_k),
@@ -95,9 +107,14 @@ def all_collections():
 def delete_collection(collection_name):
     qdrant_client.delete_collection(collection_name=collection_name)
 
-def all_points(collection_name):
-    result = qdrant_client.count(collection_name=collection_name)
-    records = qdrant_client.scroll(
+def all_points(collection_name, is_memory=False):
+    if is_memory:
+        client = qdrant_client_memory
+    else:
+        client = qdrant_client
+
+    result = client.count(collection_name=collection_name)
+    records = client.scroll(
         collection_name=collection_name,
         limit=result.count,
         with_payload=True,

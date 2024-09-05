@@ -25,7 +25,7 @@ async def search_vectorstore(query):
     st.write("📚 Searching the document...")
     if trace:
         retrieval = trace.span(name="Retrieval", metadata={"search": "document"}, input=query)
-    search_results = search_collection(st.session_state.collection_name, query, st.session_state.top_k)
+    search_results = search_collection(st.session_state.collection_name, query, st.session_state.top_k, st.session_state.knowledge_in_memory)
     st.session_state.search_results = search_results
     if trace:
         retrieval.end(output=search_results)
@@ -38,7 +38,7 @@ async def search_tavily(query):
     st.write("🌐 Searching the web...")
     if trace:
         retrieval = trace.span(name="Retrieval", metadata={"search": "tavily"}, input=query)
-    search_results = tavily.search(query, search_depth="advanced", include_images=st.session_state.image_search, max_results=st.session_state.top_search_results)
+    search_results = tavily.search(query, search_depth="advanced", include_images=st.session_state.image_search, max_results=st.session_state.top_k)
     st.session_state.search_results = search_results
     if trace:
         retrieval.end(output=search_results)                
@@ -80,7 +80,7 @@ async def generate_summary_prompt():
     with st.status("📝 Reading through the document...", expanded=False) as status:
         st.toast("Process may take a while, please wait...", icon="⏳")
         query = st.session_state.messages[-1]["content"]
-        all_texts = all_points(st.session_state.collection_name)
+        all_texts = all_points(st.session_state.collection_name, st.session_state.knowledge_in_memory)
         tasks = [llm_generate(key_points_prompt(text), "Key Points") for text in all_texts]
         key_points = await asyncio.gather(*tasks)
         status.update(label="Done and dusted!", state="complete", expanded=False)
