@@ -26,29 +26,12 @@ We built Wiz Search using the following components:
 git clone https://github.com/SSK-14/WizSearch.git
 ```
 
-2. Install required libraries
-
-- Create virtual environment
+2. Installation and setup 
 ```
-pip3 install virtualenv
-python3 -m venv {your-venvname}
-source {your-venvname}/bin/activate
+bash setup.sh
 ```
 
-- Install required libraries
-```
-pip3 install -r requirements.txt
-```
-
-- Activate your virtual environment
-```
-source {your-venvname}/bin/activate
-```
-
-3. Set up your `secrets.toml` file
-- Copy `example.secrets.toml` into `secrets.toml` and replace the keys
-
-4. Running
+3. Running
 ```
 streamlit run app.py 
 ```

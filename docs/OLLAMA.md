@@ -9,7 +9,7 @@ Explore the various models available in the Ollama library: [Ollama Library](htt
 
 To run a model, use the following command:
 ```
-ollama run llama3.1
+ollama pull llama3.1
 ```
 
 Recommended Models:

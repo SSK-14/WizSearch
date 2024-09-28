@@ -6,5 +6,7 @@ share/
 .vscode
 __pycache__/
 env
+venv
+temp
 .env
 secrets.toml
