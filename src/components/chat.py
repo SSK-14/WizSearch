@@ -187,6 +187,13 @@ def add_image():
         else:
             st.session_state.image_data = []
 
+def display_image():
+    if "VISION_MODELS" in st.secrets:
+        if len(st.session_state.image_data):
+            cols = st.columns(4)
+            for i, image in enumerate(st.session_state.image_data):
+                cols[i].image(image, use_column_width=True)
+
 def document():
     if not st.session_state.vectorstore:
         if st.button("📚 Add Knowledge", use_container_width=True):

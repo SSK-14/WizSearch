@@ -2,7 +2,7 @@ import asyncio, json, os
 import streamlit as st
 from src.components.sidebar import side_info
 from src.modules.model import llm_stream, initialise_model
-from src.components.chat import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image
+from src.components.chat import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image, display_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
@@ -20,7 +20,7 @@ async def main():
             document()
         with col2:
             add_image()
-
+    display_image()
     display_chat_messages(st.session_state.messages)
     if len(st.session_state.messages) == 1:
         example_questions()

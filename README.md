@@ -26,7 +26,7 @@ We built Wiz Search using the following components:
 git clone https://github.com/SSK-14/WizSearch.git
 ```
 
-2. Installation and setup 
+2. Installation and setup  
 ```
 bash setup.sh
 ```

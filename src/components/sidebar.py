@@ -4,6 +4,7 @@ from src.modules.tools.vectorstore import all_collections, delete_collection
 @st.dialog("View knowledge")
 def system_settings():
     collections = all_collections()
+    st.write(f"### :orange[Total documents] : **{len(collections)}**")
     if len(collections):
         col1, col2, col3 = st.columns([4, 1, 1])
         collection_name = col1.selectbox("Select a document", collections, index=0, label_visibility="collapsed")
