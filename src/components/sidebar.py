@@ -1,20 +1,23 @@
 import streamlit as st
-from src.modules.tools.vectorstore import all_collections, delete_collection
+from src.modules.tools.vectorstore import all_collections, delete_collection, collection_info
 
 @st.dialog("View knowledge")
 def system_settings():
     collections = all_collections()
     st.write(f"### :orange[Total documents] : **{len(collections)}**")
     if len(collections):
-        col1, col2, col3 = st.columns([4, 1, 1])
+        col1, col2 = st.columns([4, 1])
         collection_name = col1.selectbox("Select a document", collections, index=0, label_visibility="collapsed")
-        if col2.button("➕", use_container_width=True):
-            st.session_state.collection_name = collection_name
-            st.session_state.vectorstore = True
-            st.rerun()
-        if col3.button("🗑️", use_container_width=True):
+        if col2.button("🗑️", use_container_width=True):
             delete_collection(collection_name)
             st.rerun()
+        if collection_name:
+            collection = collection_info(collection_name)
+            col1, col2, col3 = st.columns(3)
+            col1.metric(label="Status", value=collection.status.name)
+            col2.metric(label="Points Count", value=collection.points_count)
+            if 'text-dense' in collection.config.params.vectors:
+                col3.metric(label="Dense Vector Size", value=collection.config.params.vectors['text-dense'].size) 
     else:
         st.warning("No documents found")
 

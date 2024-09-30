@@ -104,6 +104,10 @@ def all_collections():
     collections_tuple = qdrant_client.get_collections()
     return [collection.name for collection in collections_tuple.collections]
 
+def collection_info(collection_name):
+    details = qdrant_client.get_collection(collection_name=collection_name)
+    return details
+
 def delete_collection(collection_name):
     qdrant_client.delete_collection(collection_name=collection_name)
 

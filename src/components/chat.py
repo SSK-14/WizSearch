@@ -199,7 +199,7 @@ def document():
         if st.button("📚 Add Knowledge", use_container_width=True):
             add_knowledge()
     else:
-        if st.button("🗑️ Remove Knowledge", use_container_width=True):
+        if st.button(f"🗑️ {st.session_state.collection_name[:16]}...", use_container_width=True):
             st.session_state.vectorstore = False
             st.session_state.collection_name = None
             clear_chat_history()
