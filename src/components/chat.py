@@ -18,16 +18,8 @@ def display_search_result(search_results):
         with st.expander("Document Result", expanded=False):
             st.json(search_results, expanded=False)
     else:
-        if search_results["images"]:
-            with st.expander("Image Results", expanded=False):
-                cols = st.columns(len(search_results["images"]))
-                for i, image in enumerate(search_results["images"]):
-                    cols[i].image(image, use_column_width=True)
-
-        with st.expander("Search Results", expanded=False):
-            if search_results["results"]:
-                for result in search_results["results"]:
-                    st.write(f"- [{result['title']}]({result['url']})")
+        if search_results["results"]:
+            st.json(search_results["results"], expanded=False)
 
 def feedback():
     trace = st.session_state.trace

@@ -1,6 +1,7 @@
 import asyncio
 import streamlit as st
 from src.modules.model import llm_generate
+from src.components.chat import display_search_result
 from src.modules.tools.vectorstore import search_collection, all_points
 from src.modules.prompt import intent_prompt, search_rag_prompt, standalone_query_prompt
 from src.utils import abort_chat
@@ -73,7 +74,10 @@ async def generate_answer_prompt():
             prompt = generate_prompt(query, st.session_state.messages)
         else:
             prompt = base_prompt(intent, query)
-        status.update(label="Done and dusted!", state="complete", expanded=False)
+            
+        if st.session_state.search_results:
+            display_search_result(st.session_state.search_results)      
+        status.update(label="Task completed!", state="complete", expanded=False)
     return prompt, followup_query_asyncio
 
 async def generate_summary_prompt():
@@ -83,6 +87,6 @@ async def generate_summary_prompt():
         all_texts = all_points(st.session_state.collection_name, st.session_state.knowledge_in_memory)
         tasks = [llm_generate(key_points_prompt(text), "Key Points") for text in all_texts]
         key_points = await asyncio.gather(*tasks)
-        status.update(label="Done and dusted!", state="complete", expanded=False)
+        status.update(label="Task completed!", state="complete", expanded=False)
     key_points = "\n".join([f"{point}" for point in key_points])
     return summary_prompt(query, key_points)

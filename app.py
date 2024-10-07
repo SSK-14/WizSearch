@@ -2,7 +2,7 @@ import asyncio, json, os
 import streamlit as st
 from src.components.sidebar import side_info
 from src.modules.model import llm_stream, initialise_model
-from src.components.chat import display_search_result, display_chat_messages, feedback, document, followup_questions, example_questions, add_image, display_image
+from src.components.chat import display_chat_messages, feedback, document, followup_questions, example_questions, add_image, display_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
@@ -39,9 +39,6 @@ async def main():
         except Exception as e:
             end_trace(str(e), "ERROR")
             abort_chat(f"An error occurred: {e}")
-
-        if st.session_state.search_results:
-            display_search_result(st.session_state.search_results)
 
         if followup_query_asyncio:
             followup_query = await followup_query_asyncio
