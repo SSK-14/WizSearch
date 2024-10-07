@@ -1,5 +1,5 @@
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-import json
+import json, time
 from src.utils import image_data
 
  
@@ -9,11 +9,12 @@ def intent_prompt(user_query):
             content=f"Role: Intent Classifier for Search query given by the user.\n"
             f"Task: Check if the query is a valid search query and categorize it into one of the following categories intents:\n"
             f"Search: Query needs to be search factual information in internet or documents.\n"
-            f"Query examples: What is the capital of France, What was result of last night's cricket game.\n"
+            f"Query examples: [ What is the capital of France, What was result of last night's cricket game, Who is the president of USA, What are the symptoms of COVID-19, Who won the 2022 FIFA World Cup, What is the stock price of Tesla today, How do I renew my passport online, What is the population of India, What are the latest trends in AI development, What is the weather forecast for tomorrow in London ]\n"
             f"Output: 'search'\n"
             f"Generate: Query is simple and doesn't need factual information or internet search.\n"
-            f"Query examples: Write a short story about a dog, What is the meaning of life.\n"
+            f"Query examples: [ Write a short story about a dog, What is the meaning of life, Create a motivational speech for a team of engineers, Describe a futuristic city in 2050, What is your opinion on AI and ethics, Suggest some creative ideas for a birthday party, What is a unique gift idea for a friend, Draft an email apologizing for a late response, Imagine an alternative ending for Romeo and Juliet ]\n"
             f"Output: 'generate'\n"
+            f"NOTE: When you are not sure about generate or search, choose search.\n"
             f"Greeting: User greets the assistant or initiates a conversation.\n"
             f"Query examples: Hi, What are you doing, Good Morning, Thank you.\n"
             f"Output: 'greeting'\n"
@@ -32,16 +33,18 @@ def intent_prompt(user_query):
 
 
 def query_formatting_prompt(user_query):
+    current_date = time.strftime("%Y-%m-%d")
     return (
         SystemMessage(
             content=f"Role: Query Formatter for Search query given by the user.\n"
-            f"Task: Format the user query to make it more suitable for search internet or document."
+            f"Task: Format the user query to make it more suitable for search internet or document.\n"
             f"Include key information/words in the query.\n"
             f"Only return the formatted query."
             f"Do not answer the question, only format the query.\n"
         ),
         HumanMessage(
-            content=f"User Query: {user_query}\n"
+            content=f"Todays Date: {current_date}\n"
+            f"User Query: {user_query}\n"
             f"Formatted Query:"
         )
     )
@@ -214,8 +217,9 @@ def search_rag_prompt(search_results,  history=None, image_urls=[]):
 
     RULES:
     1. Only Answer the USER QUESTION using the INFORMATION.
-    2. Include source link/info in the answer.
-    3. Respond in markdown format."""
+    2. If answer is not in the search information, then respond politely as could not find answer.
+    3. Include source link as reference in answer.
+    4. Respond in markdown format."""
 
     user_prompt = f"""SEARCH INFORMATION is below:
     ---------------------
