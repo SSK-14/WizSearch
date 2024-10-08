@@ -1,4 +1,5 @@
 streamlit==1.38.0
+streamlit-lottie
 tavily-python==0.3.5
 langfuse==2.39.2
 streamlit-feedback==0.1.3

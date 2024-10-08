@@ -1,4 +1,6 @@
+import json
 import streamlit as st
+from streamlit_lottie import st_lottie
 from src.modules.tools.vectorstore import all_collections, delete_collection, collection_info
 
 @st.dialog("View knowledge")
@@ -24,8 +26,10 @@ def system_settings():
 def side_info():
     with st.sidebar:
         st.logo("src/assets/title.png", icon_image="src/assets/title.png", link="https://github.com/SSK-14")
-        st.image("src/assets/logo.png", use_column_width=True)
         st.image("src/assets/header.png", use_column_width=True)
+        with open("src/assets/header.json","r") as file: 
+                url = json.load(file) 
+        st_lottie(url)
 
         if "MODEL_BASE_URL" not in st.secrets:
             st.text_input("Model Base URL", key="model_base_url", value="https://api.groq.com/openai/v1", placeholder="Eg : https://api.openai.com/v1")
