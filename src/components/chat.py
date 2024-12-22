@@ -5,7 +5,7 @@ from streamlit_feedback import streamlit_feedback
 from src.modules.tools.vectorstore import create_collection_and_insert, all_collections
 from src.modules.tools.search import jina_reader
 from src.utils import clear_chat_history
-
+from src.modules.model import is_vision_model
 
 def display_chat_messages(messages):
     icons = {"assistant": "✨", "user": "👤"}
@@ -167,20 +167,19 @@ def upload_image():
         st.rerun()
 
 def add_image():
-    if "VISION_MODELS" in st.secrets:
-        if st.session_state.model_name in st.secrets['VISION_MODELS']:
-            if len(st.session_state.image_data):
-                if st.button("🔄 Change image", use_container_width=True):
-                    st.session_state.image_data = []
-                    st.rerun()
-            else:
-                if st.button("🖼️ Add image", use_container_width=True):
-                    upload_image()
+    if is_vision_model(st.session_state.model_name):
+        if len(st.session_state.image_data):
+            if st.button("🔄 Change image", use_container_width=True):
+                st.session_state.image_data = []
+                st.rerun()
         else:
-            st.session_state.image_data = []
+            if st.button("🖼️ Add image", use_container_width=True):
+                upload_image()
+    else:
+        st.session_state.image_data = []
 
 def display_image():
-    if "VISION_MODELS" in st.secrets:
+    if is_vision_model(st.session_state.model_name):
         if len(st.session_state.image_data):
             cols = st.columns(4)
             for i, image in enumerate(st.session_state.image_data):

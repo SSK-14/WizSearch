@@ -1,7 +1,7 @@
 import asyncio, json, os
 import streamlit as st
 from src.components.sidebar import side_info
-from src.modules.model import llm_stream, initialise_model
+from src.modules.model import llm_stream
 from src.components.chat import display_chat_messages, feedback, document, followup_questions, example_questions, add_image, display_image
 from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
@@ -12,7 +12,6 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 @st.fragment
 async def main():
     side_info()
-    initialise_model()
     
     if len(st.session_state.messages) == 1:
         col1, col2, col = st.columns([4, 4, 6])

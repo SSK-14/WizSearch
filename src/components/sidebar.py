@@ -2,6 +2,7 @@ import json
 import streamlit as st
 from streamlit_lottie import st_lottie
 from src.modules.tools.vectorstore import all_collections, delete_collection, collection_info
+from src.modules.model import model_list
 
 @st.dialog("View knowledge")
 def system_settings():
@@ -31,28 +32,13 @@ def side_info():
                 url = json.load(file) 
         st_lottie(url)
 
-        if "MODEL_BASE_URL" not in st.secrets:
-            st.text_input("Model Base URL", key="model_base_url", value="https://api.groq.com/openai/v1", placeholder="Eg : https://api.openai.com/v1")
-
-        if "MODEL_API_KEY" not in st.secrets:
-            st.text_input(
-                "Model API Key",
-                type="password",
-                placeholder="Enter your API key here",
-                help="Get your API key from [openai](https://platform.openai.com/account/api-keys) or [groq](https://console.groq.com/keys)",
-                key="model_api_key"
-            )
-
-        if "MODEL_NAMES" not in st.secrets:
-            st.text_input("Model ID", key="model_name", value="llama-3.1-8b-instant", placeholder="Eg : gpt-4o, llama3.1")
-
-        if "MODEL_NAMES" in st.secrets:
-            st.selectbox(
-                "Select Model",
-                options=st.secrets["MODEL_NAMES"],
-                index=0,
-                key="model_name"
-            )
+        
+        st.selectbox(
+            "Select Model",
+            options=model_list(),
+            index=0,
+            key="model_name"
+        )
 
         if "TAVILY_API_KEY" not in st.secrets:
             st.text_input(

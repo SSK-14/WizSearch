@@ -1,12 +1,14 @@
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 import json, time
 from src.utils import image_data
 
+def create_message(role, content):
+    return {"role": role, "content": content}
+
  
 def intent_prompt(user_query):
-    return (
-        SystemMessage(
-            content=f"Role: Intent Classifier for Search query given by the user.\n"
+    return [
+        create_message("system",
+            f"Role: Intent Classifier for Search query given by the user.\n"
             f"Task: Check if the query is a valid search query and categorize it into one of the following categories intents:\n"
             f"Search: Query needs to be search factual information in internet or documents.\n"
             f"Query examples: [ What is the capital of France, What was result of last night's cricket game, Who is the president of USA, What are the symptoms of COVID-19, Who won the 2022 FIFA World Cup, What is the stock price of Tesla today, How do I renew my passport online, What is the population of India, What are the latest trends in AI development, What is the weather forecast for tomorrow in London ]\n"
@@ -26,33 +28,31 @@ def intent_prompt(user_query):
             f"Output: 'out_of_scope'\n"
             f"Only return the intent."
         ),
-        HumanMessage(
-            content=f"User Query: {user_query}"
-        )
-    )
+        create_message("user", f"User Query: {user_query}")
+    ]
 
 
 def query_formatting_prompt(user_query):
     current_date = time.strftime("%Y-%m-%d")
-    return (
-        SystemMessage(
+    return [
+        create_message("system",
             content=f"Role: Query Formatter for Search query given by the user.\n"
             f"Task: Format the user query to make it more suitable for search internet or document.\n"
             f"Include key information/words in the query.\n"
             f"Only return the formatted query."
             f"Do not answer the question, only format the query.\n"
         ),
-        HumanMessage(
-            content=f"Todays Date: {current_date}\n"
+        create_message("user",
+            f"Todays Date: {current_date}\n"
             f"User Query: {user_query}\n"
             f"Formatted Query:"
         )
-    )
+    ]
 
 
 def key_points_prompt(text):
-    return (
-        SystemMessage(
+    return [
+        create_message("system",
             content=f"""Role: You are a extractive summarization expert.\n
             Goal: Identifies key sentences within the document using technique TF-IDF.
             Do not mention about the technique used.\n
@@ -63,18 +63,18 @@ def key_points_prompt(text):
             4. Use the exact same words/sentences.
             5. Only return the key points. No explanation needed.\n"""
         ),
-        HumanMessage(
-            content=f"""Given document content: 
+        create_message("user",
+            f"""Given document content: 
             ---------------------
             {text}
             ---------------------
             Only Key Points:"""
         )
-    )
+    ]
 
 def summary_prompt(query, text):
-    return (
-        SystemMessage(
+    return [
+        create_message("system",
             content=f"""Role: You are a extractive summarization expert.\n
             Goal: Only use the documents content below to answer the user question.\n
             Instructions: 
@@ -87,24 +87,24 @@ def summary_prompt(query, text):
             ---------------------
             """
         ),
-        HumanMessage(
-            content=f"""User query: {query}\n 
+        create_message("user",
+            f"""User query: {query}\n 
             Answer:"""
         )
-    )
+    ]
 
 def base_prompt(intent, query):
-    return (
-        SystemMessage(
+    return [
+        create_message("system",
             content=f"You are a WizSearch.AI an search expert that helps answering question.\n"
             f"Found that user query is either greetings, ambiguous, not clear or out of scope. Please provide appropriate response to the user.\n"
         ),
-        HumanMessage(
-            content=f"User query: {query}\n"
+        create_message("user",
+            f"User query: {query}\n"
             f"Intent: {intent}\n"
             f"Must only give the appropriate response."
         )
-    )
+    ]
 
 
 def followup_query_prompt(history=None):
@@ -117,8 +117,8 @@ def followup_query_prompt(history=None):
             for message in history[:-1]
         ])
 
-    return (
-        SystemMessage(
+    return [
+        create_message("system",
             content="""You are a WizSearch.AI an search expert that helps answering question. 
             Role: Follow-up Question Creator.
             TASK: Create two follow-up question's user can potentially ask based on the previous query.
@@ -132,12 +132,12 @@ def followup_query_prompt(history=None):
             If not sure or no need for follow-up question then Response: []
             Do not answer the question, only create follow-up questions.\n"""
         ),
-        HumanMessage(
-            content=f"{chat_history if chat_history else ''}\n"
+        create_message("user",
+            f"{chat_history if chat_history else ''}\n"
             f"Current User query: {query}\n"
             f"Response in ARRAY format:"
-        ) 
-    ) 
+        )
+    ]
 
 
 def standalone_query_prompt(query=None, history=None):
@@ -148,8 +148,8 @@ def standalone_query_prompt(query=None, history=None):
         for message in history[1:]
     ])
 
-    return ( 
-        SystemMessage(content=f"""Role: Standalone Question Creator.
+    return [
+        create_message("system", f"""Role: Standalone Question Creator.
             TASK: Create a standalone question based on the conversation that can be used to search.
             If the new question itself is a standalone question, then return the same question.                        
             Conversation History:
@@ -160,11 +160,11 @@ def standalone_query_prompt(query=None, history=None):
             1. Do not answer the question, only create a standalone question.
             2. Include key information/words in the question.\n"""
         ),
-        HumanMessage(
-            content=f"User query: {query}\n"
+        create_message("user",
+            f"User query: {query}\n"
             f"Standalone question:"
-        ) 
-    ) 
+        )
+    ]
 
 
 def generate_prompt(query, history=None, image_data=None):
@@ -173,30 +173,32 @@ def generate_prompt(query, history=None, image_data=None):
         for image in image_data:
             image_prompt.append({"type": "image_url", "image_url": {"url": image}})
 
-    system_prompt = SystemMessage(content=f"""You are a WizSearch.AI an search expert that helps answering question, 
+    system_content = f"""You are a WizSearch.AI an search expert that helps answering question, 
     utilize your fullest potential to provide information and assistance in your response.
 
     RULES:
     1. Only Answer the USER QUESTION.
     2. Do not hallucinate or provide false information.
-    3. Respond in markdown format.""")
+    3. Respond in markdown format."""
     
-    prompt = [system_prompt]
+    prompt = [create_message("system", system_content)]
+    
     for dict_message in history:
         if dict_message["role"] == "user":
             if dict_message == history[-1]:
                 if image_data:
-                    prompt.append(HumanMessage(content=[{"type": "text", "text": f"User query: {query}"}] + image_prompt))
+                    content = [{"type": "text", "text": f"User query: {query}"}] + image_prompt
+                    prompt.append({"role": "user", "content": content})
                 else:
-                    prompt.append(HumanMessage(content=f"User query: {query}"))
+                    prompt.append(create_message("user", f"User query: {query}"))
                 break
-            prompt.append(HumanMessage(content=dict_message["content"]))
+            prompt.append(create_message("user", dict_message["content"]))
         else:
-            prompt.append(AIMessage(content=dict_message["content"]))
+            prompt.append(create_message("assistant", dict_message["content"]))
     return prompt
 
 
-def search_rag_prompt(search_results,  history=None, image_urls=[]):
+def search_rag_prompt(search_results, history=None, image_urls=[]):
     image_prompt = []
     image_instructions = None
     images = []
@@ -228,20 +230,19 @@ def search_rag_prompt(search_results,  history=None, image_urls=[]):
     {image_instructions if image_instructions else ""}
     User query: {history[-1]["content"]}"""
 
-    system_prompt = SystemMessage(content=system_base_prompt)
+    prompt = [create_message("system", system_base_prompt)]
     
-    prompt = [system_prompt]
     for dict_message in history:
         if dict_message["role"] == "user":
             if dict_message == history[-1]:
                 if len(image_prompt) > 0:
-                    prompt.append(HumanMessage(content=[{"type": "text", "text": user_prompt}] + image_prompt))
+                    content = [{"type": "text", "text": user_prompt}] + image_prompt
+                    prompt.append({"role": "user", "content": content})
                 else:
-                    prompt.append(HumanMessage(content=user_prompt))
+                    prompt.append(create_message("user", user_prompt))
                 break
-            prompt.append(HumanMessage(content=dict_message["content"]))
+            prompt.append(create_message("user", dict_message["content"]))
         else:
-            prompt.append(AIMessage(content=dict_message["content"]))
-
+            prompt.append(create_message("assistant", dict_message["content"]))
     
     return prompt
