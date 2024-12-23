@@ -1,22 +1,22 @@
 import streamlit as st
+import os
 from qdrant_client import QdrantClient, models
 from fastembed import SparseTextEmbedding, TextEmbedding
 
-if "QDRANT_URL" in st.secrets:
-    if "QDRANT_API_KEY" in st.secrets:
+qdrant_url = os.environ.get("QDRANT_URL") or None
+qdrant_api_key = os.environ.get("QDRANT_API_KEY") or None
+
+if qdrant_url:
+    if qdrant_api_key:
         qdrant_client = QdrantClient(
-            url=st.secrets["QDRANT_URL"],
-            api_key=st.secrets["QDRANT_API_KEY"]
+            url=qdrant_url,
+            api_key=qdrant_api_key
         )
     else:
-        if "http" in st.secrets["QDRANT_URL"]:
-            qdrant_client = QdrantClient(
-                url=st.secrets["QDRANT_URL"]
-            )
+        if "http" in qdrant_url:
+            qdrant_client = QdrantClient(url=qdrant_url)
         else:
-            qdrant_client = QdrantClient(
-                path=st.secrets["QDRANT_URL"]
-            )
+            qdrant_client = QdrantClient(path=qdrant_url)
 else:
     qdrant_client = QdrantClient(":memory:")
 

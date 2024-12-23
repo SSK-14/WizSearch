@@ -1,4 +1,5 @@
 import json
+import os
 import streamlit as st
 from streamlit_lottie import st_lottie
 from src.modules.tools.vectorstore import all_collections, delete_collection, collection_info
@@ -32,7 +33,6 @@ def side_info():
                 url = json.load(file) 
         st_lottie(url)
 
-        
         st.selectbox(
             "Select Model",
             options=model_list(),
@@ -40,7 +40,7 @@ def side_info():
             key="model_name"
         )
 
-        if "TAVILY_API_KEY" not in st.secrets:
+        if not os.environ.get("TAVILY_API_KEY"):
             st.text_input(
                 "Tavily API Key",
                 type="password",

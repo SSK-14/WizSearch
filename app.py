@@ -1,5 +1,6 @@
 import asyncio, json, os
 import streamlit as st
+from dotenv import load_dotenv
 from src.components.sidebar import side_info
 from src.modules.model import llm_stream
 from src.components.chat import display_chat_messages, feedback, document, followup_questions, example_questions, add_image, display_image
@@ -7,6 +8,7 @@ from src.utils import initialise_session_state, clear_chat_history, abort_chat
 from src.modules.chain import generate_answer_prompt, generate_summary_prompt
 from src.modules.tools.langfuse import start_trace, end_trace
 
+load_dotenv()
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 @st.fragment

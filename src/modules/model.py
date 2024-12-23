@@ -1,10 +1,12 @@
 import streamlit as st
 import litellm
-import yaml
-
+import yaml, os
 litellm.modify_params = True
-litellm.success_callback = ["langfuse"]
-litellm.failure_callback = ["langfuse"]
+litellm.drop_params = True
+
+if os.environ.get("LANGFUSE_SECRET_KEY") and os.environ.get("LANGFUSE_PUBLIC_KEY"):
+    litellm.success_callback = ["langfuse"]
+    litellm.failure_callback = ["langfuse"]
 
 config_path = "config.yaml"
 with open(config_path, "r") as file:
@@ -18,40 +20,42 @@ def is_vision_model(model_name):
     model_list = CONFIG.get("model_list", [])
     for model in model_list:
         if model["model_name"] == model_name:
-            return model["model_info"].get("supports_vision", False)
+            if "model_info" in model and "supports_vision" in model["model_info"]:
+                return model["model_info"]["supports_vision"]
+            else:
+                return False
     return False
 
 def select_model(model_name):
     model_list = CONFIG.get("model_list", [])
     for model in model_list:
         if model["model_name"] == model_name:
-            api_key = model["litellm_params"].get("api_key")
-            if api_key:
-                litellm.api_key = st.secrets[api_key]
             return model["litellm_params"]["model"]
     return None
 
-
-async def llm_generate(prompt, name="llm-generate"):
-    model = select_model(st.session_state.model_name)
-    result = litellm.completion(
-        model=model,
-        messages=prompt,
-        metadata={
+def get_llm_params(prompt, name, stream=False):
+    params = {
+        "model": select_model(st.session_state.model_name),
+        "messages": prompt,
+        "metadata": {
             "generation_name": name,
             "trace_id": st.session_state.trace.id,
         },
-    )['choices'][0]['message']['content']
+        "max_tokens": st.session_state.max_tokens,
+        "temperature": st.session_state.temperature,
+    }
+    if stream:
+        params["stream"] = True
+    return params
+
+async def llm_generate(prompt, name="llm-generate"):
+    params = get_llm_params(prompt, name)
+    result = litellm.completion(**params)['choices'][0]['message']['content']
     return result
 
 def llm_stream(prompt, name="llm-stream"):
-    model = select_model(st.session_state.model_name)
-    metadata = {
-        "generation_name": name,
-        "trace_id": st.session_state.trace.id,
-    }
+    params = get_llm_params(prompt, name, stream=True)
     st.session_state.messages.append({"role": "assistant", "content": ""})
-    for chunk in litellm.completion(model=model, messages=prompt, stream=True, metadata=metadata):
+    for chunk in litellm.completion(**params):
         st.session_state.messages[-1]["content"] += str(chunk['choices'][0]['delta']['content'])
         yield str(chunk['choices'][0]['delta']['content'])
-
