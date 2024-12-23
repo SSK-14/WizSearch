@@ -9,11 +9,11 @@ Explore the various models available in the Ollama library: [Ollama Library](htt
 
 To run a model, use the following command:
 ```
-ollama pull llama3.1
+ollama pull llama3.2
 ```
 
 Recommended Models:
-- Llama3.1
+- Llama3.2
 - Llava (Vision model)
 
 ## 🌐 Tavily
@@ -55,19 +55,30 @@ pip3 install -r requirements.txt
 source {your-venvname}/bin/activate
 ```
 
-3. Set up your `secrets.toml` file
-Create a `secrets.toml` file in .streamlit folder [Refer](../.streamlit/example.secrets.toml).
+3. Set up your `config.yaml` file
+Update a `config.yaml` file in root folder [Refer](../example.config.yaml).
 Add the following values:
 ```
-MODEL_BASE_URL = "http://localhost:11434/v1"
-MODEL_NAMES = ["llama3.1", "llava"] 
-VISION_MODELS = ["llava"]
-TAVILY_API_KEY = "Your Tavily API Key"
-QDRANT_URL = "Your Qdrant URL" Eg: "http://localhost:6333"
-QDRANT_API_KEY = "Your Qdrant API Key" (optional for cloud deployments)
+model_list:
+  - model_name: llava
+    litellm_params:
+      model: "ollama/llava"
+    model_info:
+      supports_vision: True
+  - model_name: "llama3.2"
+    litellm_params:
+      model: "ollama_chat/llama3.2"
 ```
 
-4. Running
+4. Create a `.env` file in root folder [Refer](../example.env)
+Add the following values:
+```
+TAVILY_API_KEY=
+QDRANT_URL=
+```
+Other optional keys can be added as per the requirements
+
+5. Running
 ```
 streamlit run app.py 
 ```
