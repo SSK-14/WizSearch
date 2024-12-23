@@ -15,3 +15,9 @@ model_list:
   - model_name: "llama3.2"
     litellm_params:
       model: "ollama_chat/llama3.2"
+  
+embeddings_model:
+  model_name: "jina-embeddings-v3"
+  litellm_params:
+    model: "jina_ai/jina-embeddings-v3"
+    dimensions: 1024

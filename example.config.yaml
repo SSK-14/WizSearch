@@ -8,3 +8,8 @@ model_list:
     model_info:
       supports_vision: True/False (True if the model supports vision)
       
+embeddings_model:
+  model_name: "Name of the embeddings model"
+  litellm_params:
+    model: "Model id : Refers to the model id in the litellm provider https://docs.litellm.ai/docs/providers"
+    dimensions: "Dimensions of the embeddings model Eg: 1536"

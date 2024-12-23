@@ -1,8 +1,18 @@
-import streamlit as st
-import os
+import os, yaml
 from qdrant_client import QdrantClient, models
-from fastembed import SparseTextEmbedding, TextEmbedding
+from fastembed import SparseTextEmbedding
+from litellm import embedding
 
+config_path = "config.yaml"
+with open(config_path, "r") as file:
+    CONFIG = yaml.safe_load(file)
+    
+DIMENSIONS = CONFIG.get("embeddings_model", {}).get("litellm_params", {}).get("dimensions")
+DENSE_EMBEDDING_MODEL = CONFIG.get("embeddings_model", {}).get("litellm_params", {}).get("model")
+
+if not DIMENSIONS or not DENSE_EMBEDDING_MODEL:
+    raise ValueError("Dimensions or dense embedding model not found in config.yaml")
+    
 qdrant_url = os.environ.get("QDRANT_URL") or None
 qdrant_api_key = os.environ.get("QDRANT_API_KEY") or None
 
@@ -22,10 +32,12 @@ else:
 
 qdrant_client_memory = QdrantClient(":memory:")
 
-embedding_model = TextEmbedding(
-    model_name="jinaai/jina-embeddings-v2-base-en", 
-    providers=["CPUExecutionProvider"]
-)
+def create_dense_embeddings(text):
+    response = embedding(
+        model=DENSE_EMBEDDING_MODEL,
+        input=[text],
+    )
+    return response.data[0]["embedding"]
 
 sparse_embedding_model = SparseTextEmbedding(
     model_name="Qdrant/bm25",
@@ -37,7 +49,7 @@ def create_collection(client, collection):
         collection,
         vectors_config={
             "text-dense": models.VectorParams(
-                size=768,
+                size=DIMENSIONS,
                 distance=models.Distance.COSINE,
             )
         },
@@ -57,7 +69,7 @@ def create_collection_and_insert(collection_name, documents, is_memory=False):
     point_id = 1
     for doc in documents:
         text = doc.page_content
-        dense_embedding = list(embedding_model.query_embed(text))[0]
+        dense_embedding = create_dense_embeddings(text)
         sparse_embedding = list(sparse_embedding_model.query_embed(text))[0]
         client.upsert(
             collection_name=collection_name,
@@ -86,7 +98,7 @@ def search_collection(collection_name, query, top_k=4, is_memory=False):
     else:
         client = qdrant_client
 
-    dense_embedding = list(embedding_model.query_embed(query))[0]
+    dense_embedding = create_dense_embeddings(query)
     sparse_embedding = list(sparse_embedding_model.query_embed(query))[0]
     search_results = client.query_points(
         collection_name=collection_name,
