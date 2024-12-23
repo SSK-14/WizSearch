@@ -6,7 +6,7 @@ from litellm import embedding
 config_path = "config.yaml"
 with open(config_path, "r") as file:
     CONFIG = yaml.safe_load(file)
-    
+
 DIMENSIONS = CONFIG.get("embeddings_model", {}).get("litellm_params", {}).get("dimensions")
 DENSE_EMBEDDING_MODEL = CONFIG.get("embeddings_model", {}).get("litellm_params", {}).get("model")
 
