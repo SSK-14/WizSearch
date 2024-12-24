@@ -68,6 +68,12 @@ model_list:
   - model_name: "llama3.2"
     litellm_params:
       model: "ollama_chat/llama3.2"
+
+embeddings_model:
+  model_name: "mxbai-embed-large"
+  litellm_params:
+    model: "ollama/mxbai-embed-large"
+    dimensions: 512
 ```
 
 4. Create a `.env` file in root folder [Refer](../example.env)
