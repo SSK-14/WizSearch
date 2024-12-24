@@ -1,5 +1,7 @@
 import streamlit as st
-import PyPDF2, base64, secrets
+import base64, secrets
+from pathlib import Path
+from markitdown import MarkItDown
 from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from streamlit_feedback import streamlit_feedback
 from src.modules.tools.vectorstore import create_collection_and_insert, all_collections
@@ -95,12 +97,25 @@ def add_knowledge():
         tab1, tab2 = st.tabs(["Upload Document", "Add Website"])
         with tab1:
             uploaded_files = st.file_uploader(
-                "Upload PDF files", 
-                accept_multiple_files=True, 
-                type="pdf"
+                "Upload Documents", 
+                accept_multiple_files=True,
             )
 
             if uploaded_files:
+                with st.spinner("Please wait, Uploading ⌛..."):
+                    temp_dir = Path(".temp")
+                    temp_dir.mkdir(exist_ok=True)
+                    file_paths = []
+                    
+                    for existing_file in temp_dir.glob("*"):
+                        existing_file.unlink()
+                        
+                    for file in uploaded_files:
+                        temp_path = temp_dir / f"{secrets.token_hex(8)}_{file.name}"
+                        with open(temp_path, "wb") as f:
+                            f.write(file.getvalue())
+                        file_paths.append(temp_path)
+                
                 with st.expander("Chunk Settings", expanded=False):
                     col1, col2 = st.columns(2)
                     col1.slider("Chunk Size", min_value=100, max_value=2000, value=500, key="chunk_size")
@@ -108,16 +123,17 @@ def add_knowledge():
 
                 _, col, _ = st.columns([1, 2, 1])
                 if col.button("Submit", use_container_width=True, type="primary"):
-                    text = []
-                    metadatas = []
                     st.session_state.collection_name = new_collection
-                    for file in uploaded_files:
-                        pdf_reader = PyPDF2.PdfReader(file)
-                        page_number = 1
-                        for page in pdf_reader.pages:
-                            text.append(page.extract_text())
-                            metadatas.append({"page": page_number, "file": file.name})
-                            page_number += 1
+                    all_texts = []
+                    all_metadatas = []
+                    
+                    for file_path in file_paths:
+                        md = MarkItDown()
+                        result = md.convert(str(file_path))
+                        print(result)
+                        print(result.text_content)
+                        all_texts.append(result.text_content)
+                        all_metadatas.append({"file": file_path.name.split('_', 1)[1]})
 
                     text_splitter = RecursiveCharacterTextSplitter(
                         chunk_size=st.session_state.get("chunk_size") or 500,
@@ -125,11 +141,13 @@ def add_knowledge():
                         separators=["\n\n", "\n", " ", ""],
                     )
 
-                    chunks = text_splitter.create_documents(text, metadatas=metadatas)
+                    chunks = text_splitter.create_documents(all_texts, metadatas=all_metadatas)
                     _, col, _ = st.columns([1, 4, 1])
                     with col:
                         with st.spinner("Please wait, ingesting documents ⌛..."):
                             create_collection_and_insert(st.session_state.collection_name, chunks, st.session_state.knowledge_in_memory)
+                            for file_path in file_paths:
+                                file_path.unlink()
                     st.session_state.vectorstore = True
                     st.rerun()
         with tab2:
