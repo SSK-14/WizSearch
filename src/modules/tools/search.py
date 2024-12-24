@@ -1,10 +1,15 @@
 import streamlit as st
 import requests
+import os
 from tavily import TavilyClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def initialise_tavily():
-    if "TAVILY_API_KEY" in st.secrets:
-        tavily_api_key = st.secrets["TAVILY_API_KEY"]
+    tavily_api_key = os.environ.get("TAVILY_API_KEY")
+    if tavily_api_key:
+        return TavilyClient(api_key=tavily_api_key)
     elif "tavily_api_key" in st.session_state:
         tavily_api_key = st.session_state.tavily_api_key
     else:

@@ -1,0 +1,23 @@
+model_list:
+  - model_name: claude-3-5-sonnet
+    litellm_params:
+      model: "anthropic/claude-3-5-sonnet-20240620"
+    model_info:
+      supports_vision: True
+  - model_name: gpt-4o
+    litellm_params:
+      model: "openai/gpt-4o"
+    model_info:
+      supports_vision: True
+  - model_name: groq-llama3-8b-8192
+    litellm_params:
+      model: "groq/llama3-8b-8192"
+  - model_name: "llama3.2"
+    litellm_params:
+      model: "ollama_chat/llama3.2"
+  
+embeddings_model:
+  model_name: "jina-embeddings-v3"
+  litellm_params:
+    model: "jina_ai/jina-embeddings-v3"
+    dimensions: 1024

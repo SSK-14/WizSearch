@@ -8,6 +8,7 @@ from src.utils import abort_chat
 from src.modules.tools.search import initialise_tavily
 from src.modules.tools.langfuse import end_trace
 from src.modules.prompt import base_prompt, query_formatting_prompt, generate_prompt, followup_query_prompt, key_points_prompt, summary_prompt
+from src.modules.model import is_vision_model
 
 async def process_query():
     query = st.session_state.messages[-1]["content"]
@@ -46,9 +47,8 @@ async def search_tavily(query):
     if search_results["results"]:
         search_context = [{"url": obj["url"], "content": obj["content"]} for obj in search_results["results"]]
         image_urls = []
-        if "VISION_MODELS" in st.secrets:
-            if st.session_state.model_name in st.secrets['VISION_MODELS']:
-                image_urls = search_results["images"]
+        if is_vision_model(st.session_state.model_name):
+            image_urls = search_results["images"]
         return search_rag_prompt(search_context, st.session_state.messages, image_urls)
     else:
         if trace:

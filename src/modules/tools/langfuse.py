@@ -2,10 +2,8 @@ import os
 import streamlit as st
 from langfuse import Langfuse
 
-if "LANGFUSE_SECRET_KEY" in st.secrets or "LANGFUSE_PUBLIC_KEY" in st.secrets:
-    os.environ["LANGFUSE_SECRET_KEY"] = st.secrets["LANGFUSE_SECRET_KEY"]
-    os.environ["LANGFUSE_PUBLIC_KEY"] = st.secrets["LANGFUSE_PUBLIC_KEY"]
-    os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"
+if os.environ.get("LANGFUSE_SECRET_KEY") and os.environ.get("LANGFUSE_PUBLIC_KEY"):
     langfuse = Langfuse()
 else:
     langfuse = None

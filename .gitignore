@@ -7,6 +7,6 @@ share/
 __pycache__/
 env
 venv
-temp
+.temp
 .env
 secrets.toml

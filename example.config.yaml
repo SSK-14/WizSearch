@@ -1,0 +1,15 @@
+model_list:
+  - model_name: "Name of the model"
+    litellm_params:
+      model: "Model id : Refers to the model id in the litellm provider https://docs.litellm.ai/docs/providers"
+      api_key: "API key variable for the model, place key in the secrets.toml file. Eg: OPENAI_API_KEY"
+      api_base: "API base url for the model (optional)"
+      api_version: "API version for the model (optional)"
+    model_info:
+      supports_vision: True/False (True if the model supports vision)
+      
+embeddings_model:
+  model_name: "Name of the embeddings model"
+  litellm_params:
+    model: "Model id : Refers to the model id in the litellm provider https://docs.litellm.ai/docs/providers"
+    dimensions: "Dimensions of the embeddings model Eg: 1536"
