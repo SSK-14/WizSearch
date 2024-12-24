@@ -130,8 +130,6 @@ def add_knowledge():
                     for file_path in file_paths:
                         md = MarkItDown()
                         result = md.convert(str(file_path))
-                        print(result)
-                        print(result.text_content)
                         all_texts.append(result.text_content)
                         all_metadatas.append({"file": file_path.name.split('_', 1)[1]})
 
