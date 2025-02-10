@@ -199,7 +199,7 @@ def display_image():
         if len(st.session_state.image_data):
             cols = st.columns(4)
             for i, image in enumerate(st.session_state.image_data):
-                cols[i].image(image, use_column_width=True)
+                cols[i].image(image, use_container_width=True)
 
 def document():
     if not st.session_state.vectorstore:

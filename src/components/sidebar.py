@@ -28,7 +28,7 @@ def system_settings():
 def side_info():
     with st.sidebar:
         st.logo("src/assets/title.png", icon_image="src/assets/title.png", link="https://github.com/SSK-14")
-        st.image("src/assets/header.png", use_column_width=True)
+        st.image("src/assets/header.png", use_container_width=True)
         with open("src/assets/header.json","r") as file: 
                 url = json.load(file) 
         st_lottie(url)
