@@ -2,21 +2,21 @@ import json
 import os
 import streamlit as st
 from streamlit_lottie import st_lottie
-from src.modules.tools.vectorstore import all_collections, delete_collection, collection_info
-from src.modules.model import model_list
+from src.modules.tools.vectorstore import vector_store
+from src.modules.model import model
 
 @st.dialog("View knowledge")
 def system_settings():
-    collections = all_collections()
+    collections = vector_store.all_collections()
     st.write(f"### :orange[Total documents] : **{len(collections)}**")
     if len(collections):
         col1, col2 = st.columns([4, 1])
         collection_name = col1.selectbox("Select a document", collections, index=0, label_visibility="collapsed")
         if col2.button("🗑️", use_container_width=True):
-            delete_collection(collection_name)
+            vector_store.delete_collection(collection_name)
             st.rerun()
         if collection_name:
-            collection = collection_info(collection_name)
+            collection = vector_store.get_collection_info(collection_name)
             col1, col2, col3 = st.columns(3)
             col1.metric(label="Status", value=collection.status.name)
             col2.metric(label="Points Count", value=collection.points_count)
@@ -33,9 +33,11 @@ def side_info():
                 url = json.load(file) 
         st_lottie(url)
 
+        models = model.get_available_models()
+            
         st.selectbox(
             "Select Model",
-            options=model_list(),
+            options=models,
             index=0,
             key="model_name"
         )

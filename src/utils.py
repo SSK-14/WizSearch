@@ -1,66 +1,112 @@
 import streamlit as st
-import base64, requests
+import base64
+import requests
 from io import BytesIO
 from PIL import Image
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
 
-def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant. Ask me anything you are looking for 🪄."}]
-    st.session_state.chat_aborted = False
+@dataclass
+class Message:
+    """Represents a chat message."""
+    role: str
+    content: str
+    summary: bool = False
 
-def abort_chat(error_message: str):
-    assert error_message, "Error message must be provided."
-    error_message = f":red[{error_message}]"
-    if st.session_state.messages[-1]["role"] != "assistant":
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
-    else:
-        st.session_state.messages[-1]["content"] = error_message
-    st.session_state.chat_aborted = True
-    st.rerun()
+class SessionState:
+    """Manages Streamlit session state with proper initialization and typing."""
+    
+    @staticmethod
+    def initialize() -> None:
+        """Initialize all session state variables with default values."""
+        defaults = {
+            "chat_aborted": False,
+            "messages": [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant. Ask me anything you are looking for 🪄."}],
+            "vectorstore": False,
+            "temperature": 0.1,
+            "max_tokens": 2500,
+            "image_search": True,
+            "top_k": 4,
+            "search_results": None,
+            "followup_query": [],
+            "image_data": [],
+            "knowledge_in_memory": False,
+            "model_api_key": None
+        }
+        
+        for key, default_value in defaults.items():
+            if key not in st.session_state:
+                st.session_state[key] = default_value
 
-def image_data(url):
-    try:
-        pil_image = Image.open(requests.get(url, stream=True).raw)
-        buffered = BytesIO()
-        pil_image.save(buffered, format="JPEG")
-        base64_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
-        return f"data:image/jpeg;base64,{base64_image}"
-    except Exception as e:
-        return None
-
-def initialise_session_state():
-    if "chat_aborted" not in st.session_state:
+    @staticmethod
+    def clear_chat_history() -> None:
+        """Reset chat history to initial state."""
+        st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm WizSearch your super-smart AI assistant. Ask me anything you are looking for 🪄."}]
         st.session_state.chat_aborted = False
 
-    if "messages" not in st.session_state:
-        clear_chat_history()
+    @staticmethod
+    def get_messages() -> List[Dict[str, Any]]:
+        """Get current chat messages."""
+        return st.session_state.messages
 
-    if "vectorstore" not in st.session_state:
-        st.session_state.vectorstore = False
+    @staticmethod
+    def add_message(role: str, content: str, summary: bool = False) -> None:
+        """Add a new message to the chat history."""
+        message = {"role": role, "content": content}
+        if summary:
+            message["summary"] = True
+        st.session_state.messages.append(message)
 
-    if "temperature" not in st.session_state:
-        st.session_state.temperature = 0.1
+    @staticmethod
+    def update_last_message(content: str) -> None:
+        """Update the content of the last message."""
+        if st.session_state.messages:
+            st.session_state.messages[-1]["content"] = content
 
-    if "max_tokens" not in st.session_state:
-        st.session_state.max_tokens = 2500
+    @staticmethod
+    def set_chat_aborted(value: bool) -> None:
+        """Set the chat aborted state."""
+        st.session_state.chat_aborted = value
 
-    if "image_search" not in st.session_state:
-        st.session_state.image_search = True
+class Utils:
+    """Utility functions for the application."""
+    
+    @staticmethod
+    def abort_chat(error_message: str) -> None:
+        """Abort the chat with an error message."""
+        assert error_message, "Error message must be provided."
+        error_message = f":red[{error_message}]"
         
-    if "top_k" not in st.session_state:
-        st.session_state.top_k = 4
+        messages = SessionState.get_messages()
+        if messages[-1]["role"] != "assistant":
+            SessionState.add_message("assistant", error_message)
+        else:
+            SessionState.update_last_message(error_message)
+            
+        SessionState.set_chat_aborted(True)
+        st.rerun()
 
-    if "search_results" not in st.session_state:
-        st.session_state.search_results = None
+    @staticmethod
+    def process_image(url: str) -> Optional[str]:
+        """Process an image URL and return base64 encoded data."""
+        try:
+            pil_image = Image.open(requests.get(url, stream=True).raw)
+            buffered = BytesIO()
+            pil_image.save(buffered, format="JPEG")
+            base64_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            return f"data:image/jpeg;base64,{base64_image}"
+        except Exception:
+            return None
 
-    if "followup_query" not in st.session_state:
-        st.session_state.followup_query = []
+# For backward compatibility
+def clear_chat_history():
+    SessionState.clear_chat_history()
 
-    if "image_data" not in st.session_state:
-        st.session_state.image_data = []
+def abort_chat(error_message: str):
+    Utils.abort_chat(error_message)
 
-    if "knowledge_in_memory" not in st.session_state:
-        st.session_state.knowledge_in_memory = False
+def image_data(url: str) -> Optional[str]:
+    return Utils.process_image(url)
 
-    if "model_api_key" not in st.session_state:
-        st.session_state.model_api_key = None
-  
+def initialise_session_state():
+    SessionState.initialize()

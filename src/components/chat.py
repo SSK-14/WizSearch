@@ -4,10 +4,10 @@ from pathlib import Path
 from markitdown import MarkItDown
 from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from streamlit_feedback import streamlit_feedback
-from src.modules.tools.vectorstore import create_collection_and_insert, all_collections
+from src.modules.tools.vectorstore import vector_store
 from src.modules.tools.search import jina_reader
 from src.utils import clear_chat_history
-from src.modules.model import is_vision_model
+from src.modules.model import model
 
 def display_chat_messages(messages):
     icons = {"assistant": "✨", "user": "👤"}
@@ -81,7 +81,7 @@ def add_knowledge():
         st.session_state.knowledge_in_memory = True
     else:
         st.session_state.knowledge_in_memory = False
-        collections = all_collections()
+        collections = vector_store.all_collections()
         col1, col2 = st.columns(2)
         collection_name = col1.selectbox("Select a Knowledge", collections, index=None)
         if collection_name:
@@ -143,7 +143,7 @@ def add_knowledge():
                     _, col, _ = st.columns([1, 4, 1])
                     with col:
                         with st.spinner("Please wait, ingesting documents ⌛..."):
-                            create_collection_and_insert(st.session_state.collection_name, chunks, st.session_state.knowledge_in_memory)
+                            vector_store.create_collection_and_insert(st.session_state.collection_name, chunks, st.session_state.knowledge_in_memory)
                             for file_path in file_paths:
                                 file_path.unlink()
                     st.session_state.vectorstore = True
@@ -164,7 +164,7 @@ def add_knowledge():
                     if st.button("Submit", use_container_width=True, type="primary"):
                         st.session_state.collection_name = new_collection
                         with st.spinner("Please wait, ingesting documents ⌛..."):
-                            create_collection_and_insert(new_collection, md_header_splits, st.session_state.knowledge_in_memory)
+                            vector_store.create_collection_and_insert(new_collection, md_header_splits, st.session_state.knowledge_in_memory)
                         st.session_state.vectorstore = True
                         st.rerun()
 
@@ -183,7 +183,7 @@ def upload_image():
         st.rerun()
 
 def add_image():
-    if is_vision_model(st.session_state.model_name):
+    if model.supports_vision(st.session_state.model_name):
         if len(st.session_state.image_data):
             if st.button("🔄 Change image", use_container_width=True):
                 st.session_state.image_data = []
@@ -195,7 +195,7 @@ def add_image():
         st.session_state.image_data = []
 
 def display_image():
-    if is_vision_model(st.session_state.model_name):
+    if model.supports_vision(st.session_state.model_name):
         if len(st.session_state.image_data):
             cols = st.columns(4)
             for i, image in enumerate(st.session_state.image_data):
